@@ -775,3 +775,137 @@ const imageAssets = {
   food: "file:///C:/Users/user/.gemini/antigravity/brain/1a948177-ec44-4161-b2c9-5f8e3bba9581/onsen_food_1779748533916.png",
   view: "file:///C:/Users/user/.gemini/antigravity/brain/1a948177-ec44-4161-b2c9-5f8e3bba9581/onsen_view_1779748552676.png"
 };
+
+// ==================== 復元されたユーティリティ関数 ====================
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function triggerTrendImprovement() {
+  const line = document.getElementById("crm-active-trend-line");
+  const node = document.getElementById("crm-active-trend-node");
+  if (line && node) {
+    line.setAttribute("d", "M 70,110 L 170,95 L 270,70 L 360,30");
+    node.setAttribute("cy", "30");
+    node.setAttribute("fill", "var(--success)");
+  }
+}
+
+async function generateAiContentWithGemini(instruction, presetKey, logFn) {
+  const prompt = `あなたは「塩原温泉 赤沢温泉旅館」の優秀なCOO AI（統括司令塔）です。
+旅館の特徴：
+- 栃木県那須塩原市の箒川（ほうきがわ）沿いの全10室リバービューの個人経営旅館。
+- 自慢は38〜40℃の自家源泉かけ流しの「ぬる湯」。
+- 4匹の看板猫（みーちゃん、ちびちゃん、ハチ、さくら）がお出迎え。保護猫活動も行っており、将来保護猫カフェを併設予定。
+- 食事は中国人シェフによる本格創作中華。木金日限定でヴィーガン中華コースを提供。川魚は炭火焼きで提供。
+
+CEOからの経営指示：
+「${instruction}」
+
+この指示に対応するコンテンツを生成し、必ず以下の構造のJSONのみを返してください。マークダウンの囲みや余計な解説文は一切出力せず、純粋なJSONテキストのみを応答してください。
+
+{
+  "hp_summary": "自社HPの最上部に貼る、AI Overviews向けで且つユーザーフレンドリーな結論要約のHTMLブロック(ryokan-summary-blockというdivクラスを使用)。今回のCEO指示を反映した紹介文にすること。",
+  "hp_jsonld": "HPのheadに埋め込む構造化データJSON-LD（scriptタグで囲むこと。LodgingBusinessタイプをベースにし、多言語対応や今回の施策のカスタム属性を含めること）",
+  "gbp_post": "Googleビジネスプロフィール用の魅力的な定期投稿文。ハッシュタグ付き。",
+  "gbp_img_desc": "GBP投稿に添えるべき最適な写真の構図の説明（一言で）",
+  "insta_post": "Instagram用の投稿キャプション。日本語と英語を併記した魅力的な紹介文とハッシュタグを生成すること。",
+  "line_post": "LINE公式アカウントでリピーターへ配信するための、次回予約特典（クーポン付き）の案内メッセージ。",
+  "report": "データ統合・分析AIとして生成する、経営改善提言レポート。今回の施策の実行結果（モックのデータに基づき、アクセス数やLINE開封率、再来店確率が向上したシミュレーション）と、今後の経営へのアドバイスを、見出しを含めて200〜300文字程度で論理的に記述すること。"
+}`;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    if (response.ok) {
+      const resJson = await response.json();
+      const rawText = resJson.candidates[0].content.parts[0].text;
+      logFn("✅ Gemini APIからコンテンツおよび経営分析レポートの生成が完了しました！データをパースしています...", "coo-msg");
+      return JSON.parse(rawText.trim());
+    } else {
+      const errText = await response.text();
+      logFn(`❌ Gemini APIエラー: ${response.status} ${response.statusText}`, "err-msg");
+      console.error(errText);
+      return null;
+    }
+  } catch (e) {
+    logFn(`❌ 通信エラー: ${e.message}`, "err-msg");
+    console.error(e);
+    return null;
+  }
+}
+
+function renderMarketingVisualPreview(tabId) {
+  const container = document.getElementById("marketing-visual-preview");
+  if (!container) return;
+
+  const hpSummary = document.getElementById("marketing-hp-summary-output").value;
+  const gbpPost = document.getElementById("marketing-gbp-post-output").value;
+  const instaPost = document.getElementById("marketing-insta-post-output").value;
+  const gbpImgDesc = document.getElementById("marketing-gbp-img-desc").innerText;
+
+  if (tabId === "marketing-hp") {
+    container.innerHTML = `
+      <div style="font-family: 'Noto Serif JP', serif; width: 100%; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #333; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <div style="background: #1b3b2b; color: #fff; padding: 15px; text-align: center;">
+          <h4 style="margin:0; font-size: 1.1rem; letter-spacing: 2px;">塩原温泉 赤沢温泉旅館 【公式HP】</h4>
+        </div>
+        <div style="padding: 20px;">
+          <div style="margin-bottom: 20px; font-style: italic; color: #777; font-size: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">【AI Overviews優先クロール用設置ブロック】</div>
+          \${hpSummary || '<div style="color: #999; text-align: center; padding: 20px;">AIが生成した「結論ブロックHTML」がここにレンダリングされます。</div>'}
+        </div>
+      </div>
+    `;
+  } else if (tabId === "marketing-gbp") {
+    container.innerHTML = `
+      <div class="gbp-mock-container" style="width: 100%; max-width: 400px; margin: 0 auto;">
+        <div class="gbp-mock-header">
+          <div class="gbp-mock-avatar">赤</div>
+          <div class="gbp-mock-title-info">
+            <h4 style="margin:0; font-size: 0.9rem; color: #fff;">塩原温泉 赤沢温泉旅館</h4>
+            <p style="margin:0; font-size: 0.7rem; color: #a0aec0;">Googleマップの投稿</p>
+          </div>
+        </div>
+        <div class="gbp-mock-body" style="padding: 1rem; color: #fff;">
+          <p style="font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 1rem;">\${gbpPost || '投稿ドラフト文がここに表示されます。'}</p>
+          \${gbpPost ? `
+          <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--primary); text-align: center;">
+            <div style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px;">📷 推奨される写真アセット</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">\${gbpImgDesc}</div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  } else if (tabId === "marketing-instagram") {
+    container.innerHTML = `
+      <div style="background: #000; border: 1px solid #262626; border-radius: 12px; width: 100%; max-width: 380px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #fff;">
+        <div style="display: flex; align-items: center; padding: 10px; gap: 10px; border-bottom: 1px solid #262626;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px;">赤沢</div>
+          <strong style="font-size: 0.85rem;">akasawa_ryokan</strong>
+        </div>
+        <div style="width: 100%; aspect-ratio: 1/1; background: #111; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative;">
+          <img src="\${imageAssets.cat}" style="width: 100%; height: 100%; object-fit: cover;">
+          <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">📍 栃木県 塩原温泉 赤沢温泉旅館</div>
+        </div>
+        <div style="padding: 10px;">
+          <div style="display: flex; gap: 10px; margin-bottom: 8px; font-size: 1.2rem;">
+            <span>❤️</span> <span>💬</span> <span>✈️</span>
+          </div>
+          <p style="font-size: 0.8rem; margin: 0; line-height: 1.4; white-space: pre-wrap;">
+            <strong>akasawa_ryokan</strong> \${instaPost || 'Instagramキャプションがここに表示されます。'}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+}

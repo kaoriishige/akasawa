@@ -1,0 +1,12 @@
+{
+  "name": "akazawa-ai-copilot",
+  "version": "1.0.0",
+  "description": "塩原温泉 赤沢温泉旅館 AI診断・自動運営ツール",
+  "main": "app.js",
+  "scripts": {
+    "dev": "npx -y http-server -p 3000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

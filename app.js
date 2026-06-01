@@ -5,7 +5,7 @@
 */
 // グローバル変数
 let geminiApiKey = "";
-let geminiModel = "gemini-1.5-flash";
+let geminiModel = "gemini-2.5-flash";
 let autopilotInterval = null;
 let isRunningAutopilot = false;
 let mvvText = "";
@@ -243,8 +243,14 @@ async function loadConfig() {
   }
   
   const savedModel = localStorage.getItem("ryokan-gemini-model");
-  if (savedModel) {
+  const validModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.5-pro"];
+  if (savedModel && validModels.includes(savedModel)) {
     geminiModel = savedModel;
+  } else if (savedModel && !validModels.includes(savedModel)) {
+    // 古い廃止モデルが保存されていたらリセット
+    console.warn(`保存されていたモデル "${savedModel}" は廃止されました。gemini-2.5-flash にリセットします。`);
+    localStorage.removeItem("ryokan-gemini-model");
+    geminiModel = "gemini-2.5-flash";
   }
 
   updateApiStatusUI();
@@ -323,7 +329,7 @@ function initEventHandlers() {
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
-      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-1.5-flash";
+      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-2.5-flash";
       if (keyVal) {
         localStorage.setItem("ryokan-gemini-key", keyVal);
         geminiApiKey = keyVal;
@@ -343,7 +349,7 @@ function initEventHandlers() {
   if (testBtn) {
     testBtn.addEventListener("click", async () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
-      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-1.5-flash";
+      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-2.5-flash";
       const resultSpan = document.getElementById("api-test-result");
       if (!keyVal) {
         resultSpan.style.color = "var(--danger)";

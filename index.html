@@ -696,11 +696,9 @@
         <div class="form-group" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
           <label for="api-model-select">使用するAIモデル (Gemini Model)</label>
           <select id="api-model-select" style="width: 100%; padding: 0.75rem; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); margin-top: 0.5rem;">
-            <option value="gemini-1.5-flash">gemini-1.5-flash (推奨・標準)</option>
-            <option value="gemini-1.5-flash-latest">gemini-1.5-flash-latest (最新1.5フラッシュ)</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro (高性能プロモデル)</option>
-            <option value="gemini-2.0-flash">gemini-2.0-flash (最新2.0モデル)</option>
-            <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp (先行体験版)</option>
+            <option value="gemini-2.5-flash" selected>gemini-2.5-flash (推奨・最新標準)</option>
+            <option value="gemini-2.5-flash-lite-preview-06-17">gemini-2.5-flash-lite-preview-06-17 (軽量プレビュー)</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro (高性能プロモデル)</option>
           </select>
           <span class="form-tip">※ご利用 of APIキーの権限・環境に適合するモデルをお選びください。見つからないエラー（NOT_FOUND）が発生する場合は、モデルを切り替えることで解決します。</span>
         </div>

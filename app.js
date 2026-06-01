@@ -717,7 +717,13 @@ ${consultingText}
         return getMockResponse(query);
       }
     } else {
-      console.error(await response.text());
+      const errText = await response.text();
+      console.error("Gemini API Error Response:", errText);
+      // 認証エラー（無効なキーなど）を検知した場合、LocalStorageにキャッシュされている古いキーを自動削除
+      if (response.status === 400 || response.status === 403 || errText.includes("API_KEY_INVALID") || errText.includes("not valid")) {
+        console.warn("Invalid API Key detected. Clearing localstorage cache.");
+        localStorage.removeItem("ryokan-gemini-key");
+      }
       return "【お知らせ】現在、専門AIとの通信が一時的に制限されているため、ローカルの運営改善データベースから回答を出力します：\n\n" + getMockResponse(query);
     }
   } catch (e) {

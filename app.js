@@ -462,7 +462,7 @@ function addChatBubble(text, sender) {
   bubble.className = `chat-bubble ${sender}-bubble`;
   const meta = document.createElement("div");
   meta.className = "bubble-meta";
-  meta.innerText = sender === "agent" ? "🤖 COO AI エージェント" : "👤 ユーザー (スタッフ/経営者)";
+  meta.innerText = sender === "agent" ? "🐱 AIにゃんこ先生" : "👤 ユーザー (スタッフ/経営者)";
   const body = document.createElement("div");
   body.className = "bubble-text";
   

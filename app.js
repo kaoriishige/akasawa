@@ -10,6 +10,8 @@ let autopilotInterval = null;
 let isRunningAutopilot = false;
 let mvvText = "";
 let consultingText = "";
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const apiBaseUrl = isLocal ? "https://generativelanguage.googleapis.com" : "/api";
 // 宿のファクトデータベース
 const ryokanFacts = {
   name: "塩原温泉 赤沢温泉旅館",
@@ -351,7 +353,7 @@ function initEventHandlers() {
       resultSpan.style.color = "var(--warning)";
       resultSpan.innerText = "⏳ 接続テスト中...";
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelVal}:generateContent?key=${keyVal}`, {
+        const response = await fetch(`${apiBaseUrl}/v1beta/models/${modelVal}:generateContent?key=${keyVal}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contents: [{ parts: [{ text: "Hello" }] }] })
@@ -714,7 +716,7 @@ async function respondToCooChat(query) {
 }
 // 9. Gemini API を使用した COO ナレッジRAG応答
 async function generateCooKnowledgeResponse(query) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
+  const url = `${apiBaseUrl}/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
   const systemInstruction = `
 あなたは「塩原温泉 赤沢温泉旅館」の優秀なCOO AI（統括司令塔）です。
 スタッフの質問や、経営者（CEO）からの指示に対して、当館の公式ミッション・コンセプトおよびコンサルティングデータをベースにして、具体的かつ実践的に回答してください。
@@ -896,7 +898,7 @@ CEOからの経営指示：
 }`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch(`${apiBaseUrl}/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -200,19 +200,42 @@ function initTabs() {
 }
 // 2. config 読み込み (.env からの fetch 含む)
 async function loadConfig() {
+  // 1. まず key.txt を試みる (Netlify自動生成ファイル、隠しファイルではないためブロックされない)
   try {
-    const response = await fetch(".env");
+    const response = await fetch("key.txt");
     if (response.ok) {
       const text = await response.text();
-      const match = text.match(/GEMINI_API_KEY\s*=\s*["']?([^"'\r\n]+)["']?/);
-      if (match && match[1]) {
-        geminiApiKey = match[1].trim();
-        console.log("Loaded API Key from .env");
+      const val = text.trim();
+      // 環境変数名そのものが書き込まれている場合や空文字の場合を除く
+      if (val && !val.includes("$GEMINI_API_KEY") && !val.includes("GEMINI_API_KEY")) {
+        geminiApiKey = val;
+        console.log("Loaded API Key from key.txt");
+        updateApiStatusUI();
+        // ローカルストレージがあればそれより優先（ただしLocalStorageに値がある場合は下で上書き）
       }
     }
   } catch (e) {
-    console.log("Could not read .env file via fetch. Checking LocalStorage.");
+    console.log("Could not read key.txt via fetch");
   }
+
+  // 2. ローカル用の .env をフォールバックとして試みる
+  if (!geminiApiKey) {
+    try {
+      const response = await fetch(".env");
+      if (response.ok) {
+        const text = await response.text();
+        const match = text.match(/GEMINI_API_KEY\s*=\s*["']?([^"'\r\n]+)["']?/);
+        if (match && match[1]) {
+          geminiApiKey = match[1].trim();
+          console.log("Loaded API Key from .env");
+        }
+      }
+    } catch (e) {
+      console.log("Could not read .env file via fetch");
+    }
+  }
+
+  // 3. LocalStorage をチェック (画面で明示的に上書き保存した場合に最優先)
   const savedKey = localStorage.getItem("ryokan-gemini-key");
   if (savedKey) {
     geminiApiKey = savedKey;

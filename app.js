@@ -675,9 +675,11 @@ async function respondToCooChat(query) {
     addLog(`🧠 COO AI：質問を解析し、担当部署にSkillsの呼び出しを要求しました。`, "coo-msg");
     addLog(`🏢 担当部署: ${dept === "srv" ? "宿泊満足度・サービス部" : (dept === "mkt" ? "集客・マーケティング部" : (dept === "crm" ? "リピート・CRM推進部" : (dept === "ana" ? "財務・データ統合分析室" : "コンセプト・経営戦略室")))}`, "system-msg");
     addLog(`🛠️ 実行技能 (Skill): 「${skillName}」を発動中...`, "system-msg");
+    const maskedKey = geminiApiKey ? `${geminiApiKey.substring(0, 6)}...${geminiApiKey.substring(geminiApiKey.length - 4)}` : "未設定 (モックモード)";
+    addLog(`🔑 システムにロードされているAPIキー: ${maskedKey}`, "system-msg");
     setAgentDeptState(dept, "active-thinking");
     await sleep(1200);
-    if (geminiApiKey) {
+    if (geminiApiKey && geminiApiKey.trim() !== "" && geminiApiKey !== "undefined" && geminiApiKey !== "null") {
       answer = await generateCooKnowledgeResponse(query);
     } else {
       answer = getMockResponse(query);
@@ -742,16 +744,29 @@ ${consultingText}
     } else {
       const errText = await response.text();
       console.error("Gemini API Error Response:", errText);
+      
+      let errorReason = "HTTP " + response.status;
+      try {
+        const errJson = JSON.parse(errText);
+        if (errJson && errJson.error && errJson.error.message) {
+          errorReason = `${errJson.error.message} (${errJson.error.status || response.status})`;
+        } else {
+          errorReason = errText.substring(0, 100);
+        }
+      } catch (jsonErr) {
+        errorReason = errText.substring(0, 100);
+      }
+
       // 認証エラー（無効なキーなど）を検知した場合、LocalStorageにキャッシュされている古いキーを自動削除
       if (response.status === 400 || response.status === 403 || errText.includes("API_KEY_INVALID") || errText.includes("not valid")) {
         console.warn("Invalid API Key detected. Clearing localstorage cache.");
         localStorage.removeItem("ryokan-gemini-key");
       }
-      return "【お知らせ】現在、専門AIとの通信が一時的に制限されているため、ローカルの運営改善データベースから回答を出力します：\n\n" + getMockResponse(query);
+      return `【お知らせ】専門AIとの通信でエラーが発生したため（エラー詳細: ${errorReason}）、ローカルの運営改善データベースから回答を出力します：\n\n` + getMockResponse(query);
     }
   } catch (e) {
     console.error("Error fetching Gemini API:", e);
-    return "【お知らせ】通信エラーが発生したため、ローカルの運営改善データベースから代替回答を出力します：\n\n" + getMockResponse(query);
+    return `【お知らせ】通信エラーが発生したため（エラー詳細: ${e.message}）、ローカルの運営改善データベースから代替回答を出力します：\n\n` + getMockResponse(query);
   }
 }
 // 10. API未設定（モックモード）時のローカルナレッジ回答

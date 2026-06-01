@@ -321,7 +321,7 @@ function initEventHandlers() {
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
-      const modelVal = document.getElementById("api-model-select").value;
+      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-1.5-flash";
       if (keyVal) {
         localStorage.setItem("ryokan-gemini-key", keyVal);
         geminiApiKey = keyVal;
@@ -341,7 +341,7 @@ function initEventHandlers() {
   if (testBtn) {
     testBtn.addEventListener("click", async () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
-      const modelVal = document.getElementById("api-model-select").value;
+      const modelVal = document.getElementById("api-model-select")?.value || geminiModel || "gemini-1.5-flash";
       const resultSpan = document.getElementById("api-test-result");
       if (!keyVal) {
         resultSpan.style.color = "var(--danger)";

@@ -862,7 +862,7 @@ function renderMarketingVisualPreview(tabId) {
         </div>
         <div style="padding: 20px;">
           <div style="margin-bottom: 20px; font-style: italic; color: #777; font-size: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">【AI Overviews優先クロール用設置ブロック】</div>
-          \${hpSummary || '<div style="color: #999; text-align: center; padding: 20px;">AIが生成した「結論ブロックHTML」がここにレンダリングされます。</div>'}
+          ${hpSummary || '<div style="color: #999; text-align: center; padding: 20px;">AIが生成した「結論ブロックHTML」がここにレンダリングされます。</div>'}
         </div>
       </div>
     `;
@@ -877,11 +877,11 @@ function renderMarketingVisualPreview(tabId) {
           </div>
         </div>
         <div class="gbp-mock-body" style="padding: 1rem; color: #fff;">
-          <p style="font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 1rem;">\${gbpPost || '投稿ドラフト文がここに表示されます。'}</p>
-          \${gbpPost ? `
+          <p style="font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 1rem;">${gbpPost || '投稿ドラフト文がここに表示されます。'}</p>
+          ${gbpPost ? `
           <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px; border: 1px dashed var(--primary); text-align: center;">
             <div style="font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px;">📷 推奨される写真アセット</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">\${gbpImgDesc}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">${gbpImgDesc}</div>
           </div>` : ''}
         </div>
       </div>
@@ -894,7 +894,7 @@ function renderMarketingVisualPreview(tabId) {
           <strong style="font-size: 0.85rem;">akasawa_ryokan</strong>
         </div>
         <div style="width: 100%; aspect-ratio: 1/1; background: #111; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative;">
-          <img src="\${imageAssets.cat}" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="${imageAssets.cat}" style="width: 100%; height: 100%; object-fit: cover;">
           <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem;">📍 栃木県 塩原温泉 赤沢温泉旅館</div>
         </div>
         <div style="padding: 10px;">
@@ -902,7 +902,7 @@ function renderMarketingVisualPreview(tabId) {
             <span>❤️</span> <span>💬</span> <span>✈️</span>
           </div>
           <p style="font-size: 0.8rem; margin: 0; line-height: 1.4; white-space: pre-wrap;">
-            <strong>akasawa_ryokan</strong> \${instaPost || 'Instagramキャプションがここに表示されます。'}
+            <strong>akasawa_ryokan</strong> ${instaPost || 'Instagramキャプションがここに表示されます。'}
           </p>
         </div>
       </div>

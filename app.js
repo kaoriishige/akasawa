@@ -5,6 +5,7 @@
 */
 // グローバル変数
 let geminiApiKey = "";
+let geminiModel = "gemini-1.5-flash";
 let autopilotInterval = null;
 let isRunningAutopilot = false;
 let mvvText = "";
@@ -210,8 +211,6 @@ async function loadConfig() {
       if (val && !val.includes("$GEMINI_API_KEY") && !val.includes("GEMINI_API_KEY")) {
         geminiApiKey = val;
         console.log("Loaded API Key from key.txt");
-        updateApiStatusUI();
-        // ローカルストレージがあればそれより優先（ただしLocalStorageに値がある場合は下で上書き）
       }
     }
   } catch (e) {
@@ -240,16 +239,28 @@ async function loadConfig() {
   if (savedKey) {
     geminiApiKey = savedKey;
   }
+  
+  const savedModel = localStorage.getItem("ryokan-gemini-model");
+  if (savedModel) {
+    geminiModel = savedModel;
+  }
+
   updateApiStatusUI();
 }
 function updateApiStatusUI() {
   const apiDot = document.getElementById("api-status-dot");
   const apiText = document.getElementById("api-status-text");
   const keyInput = document.getElementById("api-key-input");
+  const modelSelect = document.getElementById("api-model-select");
+  
+  if (modelSelect && geminiModel) {
+    modelSelect.value = geminiModel;
+  }
+
   if (geminiApiKey) {
     if (keyInput) keyInput.value = geminiApiKey;
     apiDot.classList.add("connected");
-    apiText.innerText = "APIキー接続完了 (AI生成有効)";
+    apiText.innerText = `APIキー接続完了 (${geminiModel} 有効)`;
   } else {
     apiDot.classList.remove("connected");
     apiText.innerText = "APIキー未設定 (モックモード)";
@@ -310,12 +321,17 @@ function initEventHandlers() {
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
+      const modelVal = document.getElementById("api-model-select").value;
       if (keyVal) {
         localStorage.setItem("ryokan-gemini-key", keyVal);
         geminiApiKey = keyVal;
       } else {
         localStorage.removeItem("ryokan-gemini-key");
         geminiApiKey = "";
+      }
+      if (modelVal) {
+        localStorage.setItem("ryokan-gemini-model", modelVal);
+        geminiModel = modelVal;
       }
       updateApiStatusUI();
       modal.classList.remove("active");
@@ -325,6 +341,7 @@ function initEventHandlers() {
   if (testBtn) {
     testBtn.addEventListener("click", async () => {
       const keyVal = document.getElementById("api-key-input").value.trim();
+      const modelVal = document.getElementById("api-model-select").value;
       const resultSpan = document.getElementById("api-test-result");
       if (!keyVal) {
         resultSpan.style.color = "var(--danger)";
@@ -334,17 +351,19 @@ function initEventHandlers() {
       resultSpan.style.color = "var(--warning)";
       resultSpan.innerText = "⏳ 接続テスト中...";
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${keyVal}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelVal}:generateContent?key=${keyVal}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contents: [{ parts: [{ text: "Hello" }] }] })
         });
         if (response.ok) {
           resultSpan.style.color = "var(--success)";
-          resultSpan.innerText = "✅ 接続成功！利用可能です。";
+          resultSpan.innerText = `✅ 接続成功！${modelVal} を利用可能です。`;
         } else {
+          const errText = await response.text();
           resultSpan.style.color = "var(--danger)";
-          resultSpan.innerText = "❌ 接続失敗。無効なキーです。";
+          resultSpan.innerText = `❌ 接続失敗: ${response.status} (モデル未対応またはキー無効)`;
+          console.error(errText);
         }
       } catch (e) {
         resultSpan.style.color = "var(--danger)";
@@ -695,7 +714,7 @@ async function respondToCooChat(query) {
 }
 // 9. Gemini API を使用した COO ナレッジRAG応答
 async function generateCooKnowledgeResponse(query) {
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
   const systemInstruction = `
 あなたは「塩原温泉 赤沢温泉旅館」の優秀なCOO AI（統括司令塔）です。
 スタッフの質問や、経営者（CEO）からの指示に対して、当館の公式ミッション・コンセプトおよびコンサルティングデータをベースにして、具体的かつ実践的に回答してください。
@@ -877,7 +896,7 @@ CEOからの経営指示：
 }`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

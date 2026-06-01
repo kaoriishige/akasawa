@@ -415,8 +415,18 @@ function addChatBubble(text, sender) {
   meta.innerText = sender === "agent" ? "🤖 COO AI エージェント" : "👤 ユーザー (スタッフ/経営者)";
   const body = document.createElement("div");
   body.className = "bubble-text";
-  // Convert newlines to br tags
-  body.innerHTML = text.replace(/\n/g, "<br>");
+  
+  // 安全対策: textがundefined, null, または文字列以外の場合のフォールバック
+  let safeText = "";
+  if (typeof text === "string") {
+    safeText = text;
+  } else if (text === null || text === undefined) {
+    safeText = "（回答を取得できませんでした。もう一度お試しください）";
+  } else {
+    safeText = String(text);
+  }
+
+  body.innerHTML = safeText.replace(/\n/g, "<br>");
   bubble.appendChild(meta);
   bubble.appendChild(body);
   container.appendChild(bubble);
@@ -698,14 +708,21 @@ ${consultingText}
     });
     if (response.ok) {
       const resJson = await response.json();
-      return resJson.candidates[0].content.parts[0].text.trim();
+      if (resJson && resJson.candidates && resJson.candidates[0] && 
+          resJson.candidates[0].content && resJson.candidates[0].content.parts && 
+          resJson.candidates[0].content.parts[0] && resJson.candidates[0].content.parts[0].text) {
+        return resJson.candidates[0].content.parts[0].text.trim();
+      } else {
+        console.warn("Unexpected API response structure. Falling back to mock.");
+        return getMockResponse(query);
+      }
     } else {
       console.error(await response.text());
-      return "申し訳ありません。専門エージェントとのリアルタイム通信でエラーが発生しました。現在、ローカルの知識ベースから代替の回答を準備しています。";
+      return "【お知らせ】現在、専門AIとの通信が一時的に制限されているため、ローカルの運営改善データベースから回答を出力します：\n\n" + getMockResponse(query);
     }
   } catch (e) {
-    console.error(e);
-    return "通信エラーが発生しました。ネットワーク接続を確認してください。";
+    console.error("Error fetching Gemini API:", e);
+    return "【お知らせ】通信エラーが発生したため、ローカルの運営改善データベースから代替回答を出力します：\n\n" + getMockResponse(query);
   }
 }
 // 10. API未設定（モックモード）時のローカルナレッジ回答

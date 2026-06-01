@@ -4,7 +4,8 @@
   "description": "塩原温泉 赤沢温泉旅館 AI診断・自動運営ツール",
   "main": "app.js",
   "scripts": {
-    "dev": "npx -y http-server -p 3000"
+    "dev": "npx -y http-server -p 3000",
+    "build": "echo \"GEMINI_API_KEY=$GEMINI_API_KEY\" > .env"
   },
   "keywords": [],
   "author": "",

@@ -13,6 +13,7 @@ let consultingText = "";
 let aiAgentReportText = "";
 let brandStrategyText = "";
 let fullPlanText = "";
+let voiceRecognition = null;
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const apiBaseUrl = isLocal ? "https://generativelanguage.googleapis.com" : "/api";
 // 宿のファクトデータベース
@@ -453,6 +454,86 @@ function initEventHandlers() {
         handleCooChatSend();
       }
     });
+  }
+  // --- 音声入力（マイク）ハンドラー追加 ---
+  const voiceBtn = document.getElementById("voice-input-btn");
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (voiceBtn) {
+    if (!SpeechRecognition) {
+      voiceBtn.disabled = true;
+      voiceBtn.title = "お使いのブラウザは音声入力に対応していません";
+      console.warn("SpeechRecognition is not supported in this browser.");
+    } else {
+      voiceRecognition = new SpeechRecognition();
+      voiceRecognition.lang = "ja-JP";
+      voiceRecognition.interimResults = false;
+      voiceRecognition.continuous = false;
+
+      const addLogLocal = (text, type = "system-msg") => {
+        const logContainer = document.getElementById("agent-log-container");
+        if (!logContainer) return;
+        const div = document.createElement("div");
+        div.className = `log-line ${type}`;
+        div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+        logContainer.appendChild(div);
+        logContainer.scrollTop = logContainer.scrollHeight;
+      };
+
+      voiceBtn.addEventListener("click", () => {
+        if (voiceBtn.classList.contains("recording")) {
+          voiceRecognition.stop();
+        } else {
+          try {
+            voiceRecognition.start();
+          } catch (e) {
+            console.error("SpeechRecognition start error:", e);
+            addLogLocal("⚠️ 音声認識の開始に失敗しました。マイクへのアクセス権限等を確認してください。", "err-msg");
+          }
+        }
+      });
+
+      voiceRecognition.onstart = () => {
+        voiceBtn.classList.add("recording");
+        if (chatInput) {
+          chatInput.placeholder = "音声入力中... お話しください";
+        }
+        addLogLocal("🎤 音声入力を受け付けています。マイクに向かって話してください...", "system-msg");
+      };
+
+      voiceRecognition.onresult = (event) => {
+        const resultText = event.results[0][0].transcript;
+        if (chatInput && resultText) {
+          if (chatInput.value.trim() !== "") {
+            chatInput.value += " " + resultText;
+          } else {
+            chatInput.value = resultText;
+          }
+          addLogLocal(`✅ 音声を認識しました: 「${resultText}」`, "success-msg");
+        }
+      };
+
+      voiceRecognition.onerror = (event) => {
+        console.error("SpeechRecognition error:", event.error);
+        if (event.error === "not-allowed") {
+          addLogLocal("⚠️ マイクの使用が許可されていません。ブラウザの設定を確認してください。", "err-msg");
+        } else if (event.error === "no-speech") {
+          addLogLocal("⚠️ 音声が検出されませんでした。もう一度お試しください。", "err-msg");
+        } else {
+          addLogLocal(`⚠️ 音声認識中にエラーが発生しました: ${event.error}`, "err-msg");
+        }
+        voiceBtn.classList.remove("recording");
+        if (chatInput) {
+          chatInput.placeholder = "質問や指示をここに入力してください...";
+        }
+      };
+
+      voiceRecognition.onend = () => {
+        voiceBtn.classList.remove("recording");
+        if (chatInput) {
+          chatInput.placeholder = "質問や指示をここに入力してください...";
+        }
+      };
+    }
   }
   const shortcutBtns = document.querySelectorAll(".shortcut-btn");
   shortcutBtns.forEach(btn => {

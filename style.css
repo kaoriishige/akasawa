@@ -2171,3 +2171,69 @@ textarea {
   gap: 0.35rem;
 }
 
+/* ==================== 音声入力（マイク）追加スタイル ==================== */
+.voice-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  margin-top: 0;
+}
+
+.voice-btn:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: scale(1.05);
+}
+
+.voice-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 録音中（音声認識中）のアクティブスタイル */
+.voice-btn.recording {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  animation: voicePulse 1.5s infinite alternate;
+}
+
+.voice-btn.recording .voice-icon {
+  animation: recordingBlink 1s infinite alternate;
+  display: inline-block;
+}
+
+@keyframes voicePulse {
+  from {
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.2);
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes recordingBlink {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+

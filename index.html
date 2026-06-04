@@ -14,7 +14,7 @@
     <!-- サイドバー -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <span class="logo-icon">♨</span>
+        <img src="akasawa-nyanko.png" alt="AIにゃんこ先生" class="logo-nyanko-img">
         <div class="logo-text">
           <h1>赤沢温泉旅館</h1>
           <p>AIにゃんこ先生</p>
@@ -39,6 +39,28 @@
           <span class="icon">📊</span> ⑦ データ統合・分析部門
         </button>
       </nav>
+
+      <!-- 🔊 VOICEVOX 音声コントロール -->
+      <div class="sidebar-voice-panel">
+        <div class="voice-panel-header">
+          <span class="voice-panel-title">🔊 AIにゃんこ先生の声</span>
+          <button id="voice-toggle-btn" class="voice-toggle-btn" title="音声ON/OFF">
+            <span id="voice-toggle-icon">🔇</span>
+            <span id="voice-toggle-label" style="font-size:0.7rem;margin-left:2px;">OFF</span>
+          </button>
+        </div>
+        <select id="voice-speaker-select" class="voice-speaker-select">
+          <option value="5">🌸 東北ずん子（元気・明るい）</option>
+          <option value="8">🌻 春日部つむぎ（明るい・優しい）</option>
+          <option value="46">🌙 小夜/SAYO（落ち着き）</option>
+        </select>
+        <div id="voice-speaking-indicator" class="voice-speaking-indicator" style="display:none;">
+          <div class="speaking-wave">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span style="font-size:0.72rem;color:var(--primary);">AIにゃんこ話し中...</span>
+        </div>
+      </div>
 
       <!-- 設定エリア（APIキーなど） -->
       <div class="sidebar-footer">
@@ -67,10 +89,19 @@
           <div class="left-column">
             <!-- チャットコンソール -->
             <div class="card chat-card" style="display: flex; flex-direction: column; height: 500px; padding: 1.5rem;">
-              <h3 style="margin-bottom: 1rem;">🐱 AIにゃんこ先生 相談・指令窓口</h3>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0;">🐱 AIにゃんこ先生 相談・指令窓口</h3>
+                <button id="voice-chat-mode-btn" class="voice-chat-mode-btn" title="音声会話モード ON/OFF">
+                  🎙️ 音声会話
+                </button>
+              </div>
+              <div class="vc-active-banner" id="vc-active-banner">
+                <span class="vc-active-banner-dot"></span>
+                音声会話モード稼働中 — クリックして画面を表示
+              </div>
               <div class="chat-messages-container" id="coo-chat-messages" style="flex-grow: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem;">
                 <div class="chat-bubble agent-bubble">
-                  <div class="bubble-meta">🐱 AIにゃんこ先生</div>
+                  <div class="bubble-meta"><img src="akasawa-nyanko.png" alt="にゃんこ先生" class="bubble-avatar"> AIにゃんこ先生</div>
                   <div class="bubble-text">
                     お疲れ様です！赤沢温泉旅館のAIにゃんこ先生です。🐱✩<br>
                     当館のMVV・コンサルデータ・<strong>ブランド統合方針書・完全版実行計画書・AIエージェント組織構築レポート</strong>を統合したナレッジで対応します。<br><br>
@@ -150,8 +181,9 @@
                 <div style="color: var(--primary); font-size: 1rem; margin: -2px 0;">▼</div>
                 
                 <!-- COO Node -->
-                <div class="agent-node node-coo" id="agent-node-coo" style="background: rgba(212,175,55,0.15); border: 2px solid var(--primary); padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: bold; width: 90%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 0 10px rgba(212,175,55,0.2); transition: var(--transition); position: relative; cursor: pointer;">
-                  <span>🐱</span> <strong>AIにゃんこ先生</strong> <span style="font-size:0.75rem; color:var(--primary); font-weight:normal;">(統括司令塔)</span>
+                <div class="agent-node node-coo" id="agent-node-coo" style="background: rgba(212,175,55,0.15); border: 2px solid var(--primary); padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: bold; width: 90%; display: flex; align-items: center; justify-content: center; gap: 0.6rem; box-shadow: 0 0 10px rgba(212,175,55,0.2); transition: var(--transition); position: relative; cursor: pointer;">
+                  <img src="akasawa-nyanko.png" alt="にゃんこ先生" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,175,55,0.7);box-shadow:0 0 8px rgba(212,175,55,0.4);flex-shrink:0;">
+                  <strong>AIにゃんこ先生</strong> <span style="font-size:0.75rem; color:var(--primary); font-weight:normal;">(統括司令塔)</span>
                   
                   <div class="skills-tooltip">
                     <h4>🐱 AIにゃんこ先生 保有 Skills</h4>
@@ -721,6 +753,39 @@
     </div>
   </div>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
+
+  <!-- 音声会話モード オーバーレイ -->
+  <div class="voice-chat-overlay" id="voice-chat-overlay">
+    <div class="voice-chat-modal">
+      <button class="voice-chat-close-btn" id="vc-minimize-btn" title="最小化">✕</button>
+
+      <p class="vc-title">🎙️ AIにゃんこ先生 音声会話モード</p>
+
+      <!-- アバター -->
+      <div class="vc-avatar-wrap" id="vc-avatar-wrap">
+        <img src="akasawa-nyanko.png" alt="AIにゃんこ先生" class="vc-avatar-img">
+      </div>
+
+      <!-- 状態テキスト -->
+      <div class="vc-status-text" id="vc-status-text">準備中...</div>
+      <div class="vc-status-sub" id="vc-status-sub">マイクへのアクセスを許可してください</div>
+
+      <!-- 大型波形 -->
+      <div class="vc-waveform wave-idle" id="vc-waveform">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+
+      <!-- 認識テキスト表示 -->
+      <div class="vc-transcript-box" id="vc-transcript-box">話しかけると、ここに認識したテキストが表示されます</div>
+
+      <!-- 終了ボタン -->
+      <div class="vc-controls-row">
+        <button class="vc-end-btn" id="vc-end-btn">⏹ 音声会話を終了する</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -78,6 +78,22 @@ body {
   filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
 }
 
+.logo-nyanko-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.35), 0 0 0 3px rgba(212, 175, 55, 0.1);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.logo-nyanko-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.55), 0 0 0 4px rgba(212, 175, 55, 0.2);
+}
+
 .logo-text h1 {
   font-family: var(--font-title);
   font-size: 1.25rem;
@@ -2034,15 +2050,28 @@ textarea {
 }
 
 .bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.7rem;
   color: var(--primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
   font-weight: bold;
+}
+
+.bubble-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
+  flex-shrink: 0;
 }
 
 .user-bubble .bubble-meta {
   color: var(--text-secondary);
-  text-align: right;
+  justify-content: flex-end;
 }
 
 .shortcut-btn {
@@ -2236,4 +2265,474 @@ textarea {
   }
 }
 
+/* ==================== VOICEVOX 音声パネル ==================== */
 
+.sidebar-voice-panel {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background: rgba(212, 175, 55, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 12px;
+}
+
+.voice-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.voice-panel-title {
+  font-size: 0.78rem;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 音声ON/OFFトグルボタン */
+.voice-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.voice-toggle-btn:hover {
+  border-color: var(--primary);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--primary);
+}
+
+.voice-toggle-btn.active {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+}
+
+.voice-toggle-btn.speaking {
+  animation: voicePulse 0.8s ease-in-out infinite alternate;
+  border-color: var(--success);
+  color: var(--success);
+}
+
+@keyframes voicePulse {
+  from { box-shadow: 0 0 5px rgba(82, 183, 136, 0.2); }
+  to   { box-shadow: 0 0 14px rgba(82, 183, 136, 0.6); }
+}
+
+/* キャラクター選択ドロップダウン */
+.voice-speaker-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  border-radius: 7px;
+  padding: 0.4rem 0.6rem;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.voice-speaker-select:focus,
+.voice-speaker-select:hover {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.1);
+}
+
+/* 話し中インジケーター */
+.voice-speaking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  background: rgba(82, 183, 136, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(82, 183, 136, 0.2);
+}
+
+/* 音声波形アニメーション */
+.speaking-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.speaking-wave span {
+  display: inline-block;
+  width: 3px;
+  background: var(--success);
+  border-radius: 2px;
+  animation: wave 1s ease-in-out infinite;
+}
+
+.speaking-wave span:nth-child(1) { animation-delay: 0s;    height: 6px; }
+.speaking-wave span:nth-child(2) { animation-delay: 0.15s; height: 12px; }
+.speaking-wave span:nth-child(3) { animation-delay: 0.3s;  height: 8px; }
+.speaking-wave span:nth-child(4) { animation-delay: 0.45s; height: 12px; }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+
+/* ==================== 音声会話モード ==================== */
+
+.voice-chat-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.voice-chat-mode-btn:hover {
+  border-color: var(--primary);
+  background: rgba(212,175,55,0.08);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.voice-chat-mode-btn.active {
+  background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1));
+  border-color: #ef4444;
+  color: #ef4444;
+  box-shadow: 0 0 12px rgba(239,68,68,0.3);
+  animation: vcmPulseRing 2s ease-in-out infinite;
+}
+
+@keyframes vcmPulseRing {
+  0%, 100% { box-shadow: 0 0 8px rgba(239,68,68,0.25); }
+  50%       { box-shadow: 0 0 18px rgba(239,68,68,0.5); }
+}
+
+/* 音声会話オーバーレイ */
+.voice-chat-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(5,12,22,0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  justify-content: center;
+  align-items: center;
+}
+
+.voice-chat-overlay.active {
+  display: flex;
+  animation: vcOverlayIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes vcOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.voice-chat-modal {
+  background: linear-gradient(160deg, rgba(12,25,44,0.97) 0%, rgba(8,20,30,0.97) 100%);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 28px;
+  padding: 2.5rem 3rem;
+  width: min(520px, 92vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  position: relative;
+  animation: vcModalIn 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes vcModalIn {
+  from { transform: scale(0.88) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.voice-chat-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.voice-chat-close-btn:hover {
+  background: rgba(239,68,68,0.15);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.vc-title {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* 大きなにゃんこアバター */
+.vc-avatar-wrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+}
+
+.vc-avatar-img {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(212,175,55,0.5);
+  box-shadow: 0 0 20px rgba(212,175,55,0.2);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.vc-avatar-wrap.vc-listening .vc-avatar-img {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 10px rgba(239,68,68,0.1), 0 0 30px rgba(239,68,68,0.3);
+  animation: avatarListenPulse 1.2s ease-in-out infinite alternate;
+}
+
+.vc-avatar-wrap.vc-thinking .vc-avatar-img {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 10px rgba(248,150,30,0.08), 0 0 25px rgba(248,150,30,0.25);
+}
+
+.vc-avatar-wrap.vc-speaking .vc-avatar-img {
+  border-color: var(--success);
+  box-shadow: 0 0 0 10px rgba(82,183,136,0.1), 0 0 32px rgba(82,183,136,0.35);
+  animation: avatarSpeakPulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes avatarListenPulse {
+  from { transform: scale(1);    box-shadow: 0 0 0 6px rgba(239,68,68,0.1),  0 0 20px rgba(239,68,68,0.2); }
+  to   { transform: scale(1.04); box-shadow: 0 0 0 16px rgba(239,68,68,0.04), 0 0 36px rgba(239,68,68,0.35); }
+}
+
+@keyframes avatarSpeakPulse {
+  from { transform: scale(1);    box-shadow: 0 0 0 6px rgba(82,183,136,0.1),  0 0 22px rgba(82,183,136,0.25); }
+  to   { transform: scale(1.05); box-shadow: 0 0 0 18px rgba(82,183,136,0.04), 0 0 42px rgba(82,183,136,0.4); }
+}
+
+/* 状態テキスト */
+.vc-status-text {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  min-height: 2rem;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
+
+.vc-status-sub {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+  min-height: 1.4rem;
+  line-height: 1.6;
+  max-width: 360px;
+}
+
+/* 大型波形 */
+.vc-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 52px;
+}
+
+.vc-waveform span {
+  display: inline-block;
+  width: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.12);
+  transform-origin: center;
+  height: 5px;
+  transition: background 0.3s;
+}
+
+.vc-waveform.wave-listen span {
+  background: #ef4444;
+  animation: vcWave 0.6s ease-in-out infinite alternate;
+}
+
+.vc-waveform.wave-think span {
+  background: var(--warning);
+  animation: vcWaveThink 1.2s ease-in-out infinite;
+}
+
+.vc-waveform.wave-speak span {
+  background: var(--success);
+  animation: vcWave 0.45s ease-in-out infinite alternate;
+}
+
+.vc-waveform span:nth-child(1)  { animation-delay: 0s;     }
+.vc-waveform span:nth-child(2)  { animation-delay: 0.07s;  }
+.vc-waveform span:nth-child(3)  { animation-delay: 0.14s;  }
+.vc-waveform span:nth-child(4)  { animation-delay: 0.21s;  }
+.vc-waveform span:nth-child(5)  { animation-delay: 0.28s;  }
+.vc-waveform span:nth-child(6)  { animation-delay: 0.35s;  }
+.vc-waveform span:nth-child(7)  { animation-delay: 0.42s;  }
+.vc-waveform span:nth-child(8)  { animation-delay: 0.49s;  }
+.vc-waveform span:nth-child(9)  { animation-delay: 0.56s;  }
+
+/* wave-idle: バーは残るが動かない */
+.vc-waveform.wave-idle span:nth-child(1)  { height: 14px; }
+.vc-waveform.wave-idle span:nth-child(2)  { height: 24px; }
+.vc-waveform.wave-idle span:nth-child(3)  { height: 34px; }
+.vc-waveform.wave-idle span:nth-child(4)  { height: 40px; }
+.vc-waveform.wave-idle span:nth-child(5)  { height: 48px; }
+.vc-waveform.wave-idle span:nth-child(6)  { height: 40px; }
+.vc-waveform.wave-idle span:nth-child(7)  { height: 34px; }
+.vc-waveform.wave-idle span:nth-child(8)  { height: 24px; }
+.vc-waveform.wave-idle span:nth-child(9)  { height: 14px; }
+
+.vc-waveform.wave-listen span:nth-child(1)  { height: 14px; }
+.vc-waveform.wave-listen span:nth-child(2)  { height: 26px; }
+.vc-waveform.wave-listen span:nth-child(3)  { height: 38px; }
+.vc-waveform.wave-listen span:nth-child(4)  { height: 46px; }
+.vc-waveform.wave-listen span:nth-child(5)  { height: 50px; }
+.vc-waveform.wave-listen span:nth-child(6)  { height: 44px; }
+.vc-waveform.wave-listen span:nth-child(7)  { height: 36px; }
+.vc-waveform.wave-listen span:nth-child(8)  { height: 26px; }
+.vc-waveform.wave-listen span:nth-child(9)  { height: 14px; }
+
+.vc-waveform.wave-think span:nth-child(1)  { height: 10px; }
+.vc-waveform.wave-think span:nth-child(2)  { height: 18px; }
+.vc-waveform.wave-think span:nth-child(3)  { height: 28px; }
+.vc-waveform.wave-think span:nth-child(4)  { height: 36px; }
+.vc-waveform.wave-think span:nth-child(5)  { height: 40px; }
+.vc-waveform.wave-think span:nth-child(6)  { height: 36px; }
+.vc-waveform.wave-think span:nth-child(7)  { height: 28px; }
+.vc-waveform.wave-think span:nth-child(8)  { height: 18px; }
+.vc-waveform.wave-think span:nth-child(9)  { height: 10px; }
+
+.vc-waveform.wave-speak span:nth-child(1)  { height: 16px; }
+.vc-waveform.wave-speak span:nth-child(2)  { height: 30px; }
+.vc-waveform.wave-speak span:nth-child(3)  { height: 42px; }
+.vc-waveform.wave-speak span:nth-child(4)  { height: 48px; }
+.vc-waveform.wave-speak span:nth-child(5)  { height: 52px; }
+.vc-waveform.wave-speak span:nth-child(6)  { height: 46px; }
+.vc-waveform.wave-speak span:nth-child(7)  { height: 40px; }
+.vc-waveform.wave-speak span:nth-child(8)  { height: 28px; }
+.vc-waveform.wave-speak span:nth-child(9)  { height: 16px; }
+
+@keyframes vcWave {
+  from { transform: scaleY(0.2); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes vcWaveThink {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(0.85); }
+}
+
+/* 認識テキスト表示ボックス */
+.vc-transcript-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 0.75rem 1.2rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  text-align: center;
+  width: 100%;
+  min-height: 2.8rem;
+  line-height: 1.6;
+  font-style: italic;
+  transition: all 0.3s;
+}
+
+.vc-transcript-box.has-text {
+  color: var(--text-primary);
+  border-color: rgba(212,175,55,0.2);
+  font-style: normal;
+}
+
+/* 下部コントロール行 */
+.vc-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vc-end-btn {
+  background: rgba(239,68,68,0.12);
+  border: 1.5px solid rgba(239,68,68,0.4);
+  color: #ef4444;
+  border-radius: 24px;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition);
+}
+
+.vc-end-btn:hover {
+  background: rgba(239,68,68,0.2);
+  box-shadow: 0 0 12px rgba(239,68,68,0.3);
+  transform: translateY(-1px);
+}
+
+/* 音声会話ボタン（チャット内）のバナー */
+.vc-active-banner {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  background: linear-gradient(90deg, rgba(239,68,68,0.12), rgba(239,68,68,0.05));
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  font-size: 0.77rem;
+  color: #ef4444;
+  cursor: pointer;
+  animation: vcmPulseRing 1.5s ease-in-out infinite;
+}
+
+.vc-active-banner.show { display: flex; }
+
+.vc-active-banner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+}

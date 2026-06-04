@@ -14,6 +14,20 @@ let aiAgentReportText = "";
 let brandStrategyText = "";
 let fullPlanText = "";
 let voiceRecognition = null;
+
+// ==================== VOICEVOX 音声合成 ====================
+let voiceEnabled = false;
+let selectedVoiceSpeaker = 5; // デフォルト: 東北ずん子
+let isPlayingVoice = false;
+let currentAudioCtx = null;
+let currentAudioSource = null;
+
+// VOICEVOXキャラクター定義
+const voicevoxSpeakers = [
+  { id: 5,  name: "東北ずん子",   emoji: "🌸", style: "元気・明るい" },
+  { id: 8,  name: "春日部つむぎ", emoji: "🌻", style: "明るい・優しい" },
+  { id: 46, name: "小夜/SAYO",  emoji: "🌙", style: "落ち着き・落ち着いた新しい風" }
+];
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const apiBaseUrl = isLocal ? "https://generativelanguage.googleapis.com" : "/api";
 // 宿のファクトデータベース
@@ -536,6 +550,42 @@ function initEventHandlers() {
     }
   }
   const shortcutBtns = document.querySelectorAll(".shortcut-btn");
+
+  // --- VOICEVOX 音声ボタン & キャラクター選択 ---
+  const voiceToggleBtn = document.getElementById("voice-toggle-btn");
+  const voiceSpeakerSelect = document.getElementById("voice-speaker-select");
+
+  if (voiceToggleBtn) {
+    voiceToggleBtn.addEventListener("click", () => {
+      voiceEnabled = !voiceEnabled;
+      const icon = document.getElementById("voice-toggle-icon");
+      const label = document.getElementById("voice-toggle-label");
+      if (voiceEnabled) {
+        voiceToggleBtn.classList.add("active");
+        if (icon) icon.textContent = "🔊";
+        if (label) label.textContent = "ON";
+        // 挨拶音声
+        const speaker = voicevoxSpeakers.find(s => s.id === selectedVoiceSpeaker);
+        speakText(`にゃん！AIにゃんこ先生です。${speaker ? speaker.name + 'の声でお届けします。' : ''}何でもご相談ください！`);
+      } else {
+        voiceToggleBtn.classList.remove("active");
+        if (icon) icon.textContent = "🔇";
+        if (label) label.textContent = "OFF";
+        stopVoice();
+      }
+    });
+  }
+
+  if (voiceSpeakerSelect) {
+    voiceSpeakerSelect.addEventListener("change", () => {
+      selectedVoiceSpeaker = parseInt(voiceSpeakerSelect.value, 10);
+      if (voiceEnabled) {
+        const speaker = voicevoxSpeakers.find(s => s.id === selectedVoiceSpeaker);
+        if (speaker) speakText(`${speaker.name}に切り替えました。よろしくにゃん！`);
+      }
+    });
+  }
+
   shortcutBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       const query = btn.getAttribute("data-query");
@@ -561,7 +611,16 @@ function addChatBubble(text, sender) {
   bubble.className = `chat-bubble ${sender}-bubble`;
   const meta = document.createElement("div");
   meta.className = "bubble-meta";
-  meta.innerText = sender === "agent" ? "🐱 AIにゃんこ先生" : "👤 ユーザー (スタッフ/経営者)";
+  if (sender === "agent") {
+    const avatarImg = document.createElement("img");
+    avatarImg.src = "akasawa-nyanko.png";
+    avatarImg.alt = "にゃんこ先生";
+    avatarImg.className = "bubble-avatar";
+    meta.appendChild(avatarImg);
+    meta.appendChild(document.createTextNode(" AIにゃんこ先生"));
+  } else {
+    meta.innerText = "👤 ユーザー (スタッフ/経営者)";
+  }
   const body = document.createElement("div");
   body.className = "bubble-text";
   
@@ -581,6 +640,13 @@ function addChatBubble(text, sender) {
   container.appendChild(bubble);
   // Auto-scroll
   container.scrollTop = container.scrollHeight;
+  // AIにゃんこ先生の返答を音声で読み上げ
+  if (sender === "agent") {
+    if (isVoiceChatActive) {
+      setVcState('speaking');
+    }
+    setTimeout(() => speakText(safeText), 300);
+  }
 }
 // 6. COO AI 統合アクション実行 (チャット連動・3AI自律実行)
 async function executeCooIntegratedAction(instruction, presetKey) {
@@ -829,7 +895,7 @@ async function generateCooKnowledgeResponse(query) {
 あなたは「塩原温泉 赤沢温泉旅館」の優秀なCOO AI（統括司令塔）です。企業理念を体現するAIエージェント組織の一員として、MVV・ブランド戦略・完全版実行計画を深く理解し、スタッフや経営者（CEO）の相談・指示に具体的かつ実践的に回答してください。
 
 当館の基本情報：
-- ミッション：「猫との出会いと、ぬる湯の癒しで、心身をリセットする場を提供する」
+- ミッション：「日本の田舎に息づく大自然・健康・文化の価値を、誠実で快適な滞在体験として届け、訪れる人の心と身体に感動と回復をもたらす。地域の良さを発掘・発信し、地域に人の流れと希望を生み出す拠点となる。」
 - コンセプト：「猫とぬる湯と渓流にほどける、静養型ウェルネスの小宿」（猫 × ぬる湯 × 渓流 × 静養）
 - 看板猫：みーちゃん、ちびちゃん、ハチ、さくら
 - 温泉：自家源泉かけ流しの「ぬる湯」（源泉44℃、内湯40℃前後、露天38℃前後）
@@ -1127,3 +1193,448 @@ function renderMarketingVisualPreview(tabId) {
     `;
   }
 }
+
+// ==================== VOICEVOX 音声合成関数群 ====================
+
+/**
+ * テキストをVOICEVOXで読み上げる
+ * Netlify Function (/.netlify/functions/voicevox) を経由して音声取得
+ * 失敗した場合はWeb Speech APIにフォールバック
+ */
+async function speakText(text) {
+  // 音声会話モード中の場合の自動再開ヘルパー
+  const handleVoiceChatAutoRestart = () => {
+    if (typeof isVoiceChatActive !== 'undefined' && isVoiceChatActive && vcAutoRestart) {
+      setVcState('listening');
+      setTimeout(() => vcStartListening(), 700);
+    }
+  };
+
+  if (!voiceEnabled || !text) {
+    handleVoiceChatAutoRestart();
+    return;
+  }
+
+  // 再生中の音声を停止
+  stopVoice();
+
+  // テキストを整形（HTMLタグや装飾記号を除去、300文字に制限）
+  let cleanText = text
+    .replace(/<br\s*\/?>/gi, '。')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/【[^】]+】/g, '')
+    .replace(/■/g, '')
+    .replace(/●/g, '')
+    .replace(/^\s*[-*#]\s*/gm, '')
+    .replace(/https?:\/\/\S+/g, '')
+    .trim();
+
+  if (cleanText.length > 300) {
+    cleanText = cleanText.substring(0, 297) + '…';
+  }
+  if (!cleanText) {
+    handleVoiceChatAutoRestart();
+    return;
+  }
+
+  updateVoiceStatus('talking');
+
+  try {
+    // Netlify Function でVOICEVOX APIを呼び出す
+    const endpoint = isLocal
+      ? '/.netlify/functions/voicevox'  // netlify dev で動作
+      : '/.netlify/functions/voicevox'; // 本番
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: cleanText,
+        speaker: selectedVoiceSpeaker,
+        pitch: 0,
+        speed: 1.1
+      })
+    });
+
+    if (!response.ok) {
+      console.warn(`VOICEVOX Function失敗 (${response.status}): Web Speech APIにフォールバック`);
+      await speakTextWebSpeech(cleanText);
+      return;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+      await speakTextWebSpeech(cleanText);
+      return;
+    }
+
+    // AudioContextで音声を再生
+    if (currentAudioCtx) {
+      try { currentAudioCtx.close(); } catch(e) {}
+    }
+    currentAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const decoded = await currentAudioCtx.decodeAudioData(arrayBuffer);
+    currentAudioSource = currentAudioCtx.createBufferSource();
+    currentAudioSource.buffer = decoded;
+    currentAudioSource.connect(currentAudioCtx.destination);
+    isPlayingVoice = true;
+    currentAudioSource.onended = () => {
+      isPlayingVoice = false;
+      updateVoiceStatus('idle');
+      handleVoiceChatAutoRestart();
+    };
+    currentAudioSource.start(0);
+
+  } catch (err) {
+    console.warn('VOICEVOX音声再生エラー:', err.message);
+    updateVoiceStatus('idle');
+    // フォールバック: Web Speech API（ブラウザ標準TTS）
+    await speakTextWebSpeech(cleanText);
+  }
+}
+
+/**
+ * Web Speech API (ブラウザ標準) によるフォールバック音声合成
+ */
+async function speakTextWebSpeech(text) {
+  const handleVoiceChatAutoRestart = () => {
+    if (typeof isVoiceChatActive !== 'undefined' && isVoiceChatActive && vcAutoRestart) {
+      setVcState('listening');
+      setTimeout(() => vcStartListening(), 700);
+    }
+  };
+
+  if (!('speechSynthesis' in window)) {
+    handleVoiceChatAutoRestart();
+    return;
+  }
+  try {
+    // 進行中の発話をキャンセル
+    window.speechSynthesis.cancel();
+
+    // 少しだけ遅延を入れてキャンセルの処理を確実に完了させる（ブラウザのバグ回避）
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 1.05;
+    utterance.pitch = 1.15;
+    utterance.volume = 0.9;
+
+    // 日本語の音声を明示的に探して設定（iOS/Chrome/Edge対策）
+    const voices = window.speechSynthesis.getVoices();
+    const jaVoice = voices.find(v => v.lang === 'ja-JP' || v.lang.replace('_', '-').startsWith('ja-'));
+    if (jaVoice) {
+      utterance.voice = jaVoice;
+    }
+
+    updateVoiceStatus('talking');
+    utterance.onend = () => {
+      updateVoiceStatus('idle');
+      handleVoiceChatAutoRestart();
+    };
+    utterance.onerror = (event) => {
+      console.warn('Web Speech API onerror:', event);
+      updateVoiceStatus('idle');
+      handleVoiceChatAutoRestart();
+    };
+    window.speechSynthesis.speak(utterance);
+  } catch(e) {
+    console.error('Web Speech API error:', e);
+    updateVoiceStatus('idle');
+    handleVoiceChatAutoRestart();
+  }
+}
+
+/**
+ * 再生中の音声を停止する
+ */
+function stopVoice() {
+  if (currentAudioSource) {
+    try { currentAudioSource.stop(); } catch(e) {}
+    currentAudioSource = null;
+  }
+  if (currentAudioCtx) {
+    try { currentAudioCtx.close(); } catch(e) {}
+    currentAudioCtx = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isPlayingVoice = false;
+  updateVoiceStatus('idle');
+}
+
+/**
+ * 音声状態に応じてUIを更新
+ */
+function updateVoiceStatus(status) {
+  const indicator = document.getElementById('voice-speaking-indicator');
+  const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+  if (status === 'talking') {
+    if (indicator) indicator.style.display = 'flex';
+    if (voiceToggleBtn) voiceToggleBtn.classList.add('speaking');
+  } else {
+    if (indicator) indicator.style.display = 'none';
+    if (voiceToggleBtn) voiceToggleBtn.classList.remove('speaking');
+  }
+}
+
+// ==================== 音声会話モード ====================
+
+let isVoiceChatActive = false;
+let vcRecognition = null;
+let vcAutoRestart = false;
+
+/**
+ * 音声会話モードのUI要素を取得するヘルパー
+ */
+function vcEl(id) { return document.getElementById(id); }
+
+/**
+ * 音声会話オーバーレイの状態を更新
+ * state: 'idle' | 'listening' | 'thinking' | 'speaking'
+ */
+function setVcState(state) {
+  const avatarWrap    = vcEl('vc-avatar-wrap');
+  const waveform      = vcEl('vc-waveform');
+  const statusText    = vcEl('vc-status-text');
+  const statusSub     = vcEl('vc-status-sub');
+
+  // クラスをリセット
+  if (avatarWrap) {
+    avatarWrap.classList.remove('vc-listening', 'vc-thinking', 'vc-speaking');
+  }
+  if (waveform) {
+    waveform.classList.remove('wave-idle', 'wave-listen', 'wave-think', 'wave-speak');
+  }
+
+  switch (state) {
+    case 'listening':
+      if (avatarWrap) avatarWrap.classList.add('vc-listening');
+      if (waveform)   waveform.classList.add('wave-listen');
+      if (statusText) statusText.textContent = '🎤 聞いています...';
+      if (statusSub)  statusSub.textContent  = 'はっきりとお話しください。話し終わると自動的に送信されます。';
+      break;
+    case 'thinking':
+      if (avatarWrap) avatarWrap.classList.add('vc-thinking');
+      if (waveform)   waveform.classList.add('wave-think');
+      if (statusText) statusText.textContent = '🧠 考えています...';
+      if (statusSub)  statusSub.textContent  = 'AIにゃんこ先生が回答を生成しています。少々お待ちください。';
+      break;
+    case 'speaking':
+      if (avatarWrap) avatarWrap.classList.add('vc-speaking');
+      if (waveform)   waveform.classList.add('wave-speak');
+      if (statusText) statusText.textContent = '🔊 話しています...';
+      if (statusSub)  statusSub.textContent  = '読み上げが終わると自動的に次の音声入力を開始します。';
+      break;
+    default: // idle
+      if (waveform)   waveform.classList.add('wave-idle');
+      if (statusText) statusText.textContent = '準備完了';
+      if (statusSub)  statusSub.textContent  = '音声会話ボタンをタップするか、話しかけてください。';
+  }
+}
+
+/**
+ * 音声会話モードを開始する
+ */
+function startVoiceChatMode() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('お使いのブラウザは音声認識に対応していません。\nChrome または Edge をご使用ください。');
+    return;
+  }
+
+  isVoiceChatActive = true;
+  vcAutoRestart     = true;
+
+  // 音声出力を自動ON
+  if (!voiceEnabled) {
+    voiceEnabled = true;
+    const icon  = document.getElementById('voice-toggle-icon');
+    const label = document.getElementById('voice-toggle-label');
+    const btn   = document.getElementById('voice-toggle-btn');
+    if (icon)  icon.textContent  = '🔊';
+    if (label) label.textContent = 'ON';
+    if (btn)   btn.classList.add('active');
+  }
+
+  // オーバーレイを表示
+  const overlay = vcEl('voice-chat-overlay');
+  if (overlay) overlay.classList.add('active');
+
+  // バナーを表示
+  const banner  = vcEl('vc-active-banner');
+  if (banner) banner.classList.add('show');
+
+  // ボタンをアクティブ表示
+  const modeBtn = vcEl('voice-chat-mode-btn');
+  if (modeBtn) modeBtn.classList.add('active');
+
+  // SpeechRecognition の初期化
+  vcRecognition = new SpeechRecognition();
+  vcRecognition.lang            = 'ja-JP';
+  vcRecognition.interimResults  = true;
+  vcRecognition.continuous      = false;
+
+  vcRecognition.onstart = () => {
+    setVcState('listening');
+  };
+
+  vcRecognition.onresult = (event) => {
+    let interim = '';
+    let finalTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += t;
+      } else {
+        interim += t;
+      }
+    }
+    const box = vcEl('vc-transcript-box');
+    const displayText = finalTranscript || interim;
+    if (box && displayText) {
+      box.textContent = displayText;
+      box.classList.add('has-text');
+    }
+  };
+
+  vcRecognition.onend = async () => {
+    if (!isVoiceChatActive) return;
+    const box = vcEl('vc-transcript-box');
+    const transcript = box ? box.textContent.trim() : '';
+    const ignoreTexts = ['話しかけると、ここに認識したテキストが表示されます', '準備完了'];
+
+    if (transcript && !ignoreTexts.includes(transcript)) {
+      // テキストが取得できた → チャットに送信
+      setVcState('thinking');
+      addChatBubble(transcript, 'user');
+
+      // 通常チャットの入力にも反映
+      const chatInput = document.getElementById('coo-chat-input');
+      if (chatInput) chatInput.value = '';
+
+      // AIへの問い合わせ
+      const isExec = transcript.includes('施策') && (transcript.includes('実行') || transcript.includes('やって') || transcript.includes('送って'));
+      if (isExec) {
+        let preset = transcript.includes('猫') ? 'cats' : 'summer';
+        await executeCooIntegratedAction(transcript, preset);
+        // 読み上げ完了後に次の録音を開始するフックは addChatBubble → speakText 内で処理
+      } else {
+        await respondToCooChat(transcript);
+      }
+    } else {
+      // 無言だった → 直ちに再起動
+      if (vcAutoRestart && isVoiceChatActive) {
+        setTimeout(() => vcStartListening(), 600);
+      }
+    }
+  };
+
+  vcRecognition.onerror = (e) => {
+    console.warn('VoiceChat認識エラー:', e.error);
+    if (e.error === 'not-allowed') {
+      alert('マイクへのアクセスが拒否されました。\nブラウザの設定からマイクの使用を許可してください。');
+      stopVoiceChatMode();
+      return;
+    }
+    if (vcAutoRestart && isVoiceChatActive) {
+      setTimeout(() => vcStartListening(), 1000);
+    }
+  };
+
+  vcStartListening();
+}
+
+/**
+ * 音声認識を開始するラッパー（再起動時も使用）
+ */
+function vcStartListening() {
+  if (!isVoiceChatActive || !vcRecognition) return;
+  const box = vcEl('vc-transcript-box');
+  if (box) {
+    box.textContent = '話しかけると、ここに認識したテキストが表示されます';
+    box.classList.remove('has-text');
+  }
+  try {
+    vcRecognition.start();
+  } catch (e) {
+    // 既に開始している場合など
+    setTimeout(() => {
+      try { vcRecognition.start(); } catch(e2) {}
+    }, 500);
+  }
+}
+
+/**
+ * 音声会話モードを終了する
+ */
+function stopVoiceChatMode() {
+  isVoiceChatActive = false;
+  vcAutoRestart     = false;
+
+  if (vcRecognition) {
+    try { vcRecognition.stop(); } catch(e) {}
+    vcRecognition = null;
+  }
+
+  // オーバーレイを非表示
+  const overlay = vcEl('voice-chat-overlay');
+  if (overlay) overlay.classList.remove('active');
+
+  // バナーを非表示
+  const banner = vcEl('vc-active-banner');
+  if (banner) banner.classList.remove('show');
+
+  // ボタンのアクティブ解除
+  const modeBtn = vcEl('voice-chat-mode-btn');
+  if (modeBtn) modeBtn.classList.remove('active');
+
+  setVcState('idle');
+}
+
+// 音声会話モードのイベントハンドラ初期化（DOMContentLoaded後に呼ぶ）
+function initVoiceChatMode() {
+  const modeBtn   = vcEl('voice-chat-mode-btn');
+  const endBtn    = vcEl('vc-end-btn');
+  const minBtn    = vcEl('vc-minimize-btn');
+  const banner    = vcEl('vc-active-banner');
+  const overlay   = vcEl('voice-chat-overlay');
+
+  if (modeBtn) {
+    modeBtn.addEventListener('click', () => {
+      if (isVoiceChatActive) {
+        stopVoiceChatMode();
+      } else {
+        startVoiceChatMode();
+      }
+    });
+  }
+
+  if (endBtn) {
+    endBtn.addEventListener('click', () => stopVoiceChatMode());
+  }
+
+  if (minBtn) {
+    // 最小化：オーバーレイを隠すがモードは継続
+    minBtn.addEventListener('click', () => {
+      if (overlay) overlay.classList.remove('active');
+    });
+  }
+
+  if (banner) {
+    // バナークリック → オーバーレイを再表示
+    banner.addEventListener('click', () => {
+      if (overlay) overlay.classList.add('active');
+    });
+  }
+}
+
+// DOMContentLoaded に音声会話モードの初期化を追加
+document.addEventListener('DOMContentLoaded', () => {
+  // 既存の DOMContentLoaded に追加（app.js 内の既存の async 初期化とは別）
+  setTimeout(() => initVoiceChatMode(), 100);
+});
+

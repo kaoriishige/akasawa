@@ -21,6 +21,22 @@
         </div>
       </div>
 
+      <!-- 📊 AI検索診断スコア (診断レポート連動) -->
+      <div class="score-card-mini">
+        <div class="score-label">AI検索診断総合スコア</div>
+        <div class="score-gauge-container">
+          <svg class="score-ring">
+            <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+            <circle class="ring-fill" id="score-ring-fill" cx="55" cy="55" r="50" style="stroke-dashoffset: 150.72;"></circle>
+          </svg>
+          <div class="score-value">
+            <span id="current-score">52</span>
+            <span class="score-total">/100</span>
+          </div>
+        </div>
+        <div class="score-rank-badge rank-d" id="score-rank-badge">D ランク</div>
+      </div>
+
       <!-- ナビゲーションメニュー (5画面に拡張) -->
       <nav class="sidebar-nav" style="margin-top: 1rem;">
         <button class="nav-btn active" data-tab="tab-ceo-copilot">
@@ -145,6 +161,10 @@
                   <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <button class="shortcut-btn execute-shortcut" data-preset="cats" data-query="猫好きのリピーターを増やしたい。過去に泊まってくれた『猫好き』のお客さんにLINEクーポンを送って。">🐱 猫好きリピーター施策 [実行]</button>
                     <button class="shortcut-btn execute-shortcut" data-preset="summer" data-query="夏休みの平日に『ぬる湯長湯プラン』をアピールして、新規獲得からLINEフォローまで一気通貫でやって。">♨️ 夏休みぬる湯施策 [実行]</button>
+                    <button class="shortcut-btn execute-shortcut" data-preset="vegan" data-query="創作中華とヴィーガン料理の魅力をアピールして、木金日限定のヴィーガン中華コースと、アレルギー対応、食事提供テンポ調整を一括実行して。">🍲 中華・ヴィーガン施策 [実行]</button>
+                    <button class="shortcut-btn execute-shortcut" data-preset="inbound" data-query="外国人観光客向けの多言語案内やお風呂マナー掲示、Booking.comでのresident catや温泉情報の英語案内を一括実行して。">🌐 インバウンド対応施策 [実行]</button>
+                    <button class="shortcut-btn execute-shortcut" data-preset="access" data-query="最終バス時刻の注意案内、来館3日前リマインド、送迎台帳運用の施策を一括実行して。">🚌 送迎・アクセス案内施策 [実行]</button>
+                    <button class="shortcut-btn execute-shortcut" data-preset="fix" id="emergency-fix-btn" style="background: rgba(249, 65, 68, 0.15); border: 1px solid var(--danger); color: #f94144;" data-query="公式サイトの『ほてるISAGO神戸』という誤表記と、ダミー電話番号『0123-45-6789』を今すぐ修正して！">🚨 信頼毀損の緊急止血 [実行]</button>
                     <button class="shortcut-btn" data-query="赤沢温泉旅館のブランド統合方針書に基づき、ミッション・ビジョン・バリュー・コンセプトと非ターゲット層を要約して。">📋 ブランド・MVV確認</button>
                     <button class="shortcut-btn" data-query="完全版実行計画書のフェーズ別ロードマップとKPI/KGIの主要ポイントを教えて。">📅 実行計画・ロードマップ</button>
                     <button class="shortcut-btn" data-query="AI検索時代（Google AI Mode）への対応と直販比率向上のための具体的な戦略を教えて。">🤖 AI検索・直販強化</button>

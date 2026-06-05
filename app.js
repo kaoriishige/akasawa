@@ -48,14 +48,24 @@ const ryokanFacts = {
 const customerDatabase = [
   { id: 1, name: "佐藤 健二 様", visits: 5, lastVisit: "2026-03-12", tags: ["cats", "onsen"], prob: 75 },
   { id: 2, name: "リン・チェン 様 (台湾)", visits: 2, lastVisit: "2026-04-05", tags: ["onsen", "vegan"], prob: 60 },
-  { id: 3, name: "田中 美咲 様", visits: 12, lastVisit: "2026-05-10", tags: [// モックデータ定義
+  { id: 3, name: "田中 美咲 様", visits: 12, lastVisit: "2026-05-10", tags: ["cats", "vip"], prob: 95 },
+  { id: 4, name: "鈴木 拓海 様", visits: 1, lastVisit: "2025-11-20", tags: ["onsen"], prob: 30 },
+  { id: 5, name: "高橋 陽子 様", visits: 3, lastVisit: "2026-02-28", tags: ["vegan"], prob: 50 },
+  { id: 6, name: "ジェームズ・スミス 様", visits: 1, lastVisit: "2026-04-18", tags: ["onsen", "vegan"], prob: 45 },
+  { id: 7, name: "渡辺 裕太 様", visits: 8, lastVisit: "2026-05-01", tags: ["cats", "onsen", "vip"], prob: 88 },
+  { id: 8, name: "小林 杏奈 様", visits: 2, lastVisit: "2025-08-15", tags: ["cats"], prob: 20 },
+  { id: 9, name: "チャン・ワイマン 様 (香港)", visits: 1, lastVisit: "2026-03-25", tags: ["cats", "vegan"], prob: 55 },
+  { id: 10, name: "加藤 雅也 様", visits: 15, lastVisit: "2026-05-18", tags: ["onsen", "vip"], prob: 98 }
+];
+
+// モックデータ定義
 const mockSolutions = {
   cats: {
     hp_summary: `<!-- AI Overviews & 看板猫ブロック -->
 <div class="ryokan-summary-block" style="border: 2px solid #d4af37; background: #faf8f5; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
   <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #1b3b2b; padding-bottom: 8px;">看板猫4匹とふれあう癒やしの温泉宿</h2>
   <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    当館は<strong>「みーちゃん」「ちびちゃん」「ハチ」「さくら」の4匹の個性豊かな看板猫</strong>が暮らす、猫好きにはたまらない温泉旅館です。ロビーでのふれあいはもちろん、保護猫活動を支援するストーリーもあり、将来的な保護猫カフェ併設に向けて取り組んでいます。猫アレルギーのお客様向けには、空気清浄機の設置や入念な清鎖を徹底したお部屋をご案内しています。
+    当館は<strong>「みーちゃん」「ちびちゃん」「ハチ」「さくら」の4匹の個性豊かな看板猫</strong>が暮らす、猫好きにはたまらない温泉旅館です。ロビーでのふれあいはもちろん、保護猫活動を支援するストーリーもあり、将来的な保護猫カフェ併設に向けて取り組んでいます。猫アレルギーのお客様向けには、空気清浄機の設置や入念な清掃を徹底したお部屋をご案内しています。
   </p>
 </div>`,
     hp_jsonld: `<script type="application/ld+json">
@@ -89,7 +99,7 @@ const mockSolutions = {
 Mascot cat "Chibi-chan" greeting our guests at the lobby! Come and be healed by our natural hot spring and friendly cats. 🐱♨️
 #赤沢温泉旅館 #塩原温泉 #看板猫 #猫のいる宿 #保護猫 #猫好きさんと繋がりたい #CatLovers #NasuShiobara #RyokanCat #CatsOfInstagram`,
     line_post: `【猫好きの皆様へ限定🐈】いつも赤沢温泉旅館を応援いただきありがとうございます。
-看板猫「みーちゃん」「ちびちゃん」たちから日頃の感謝を込めて、猫ちゃん大好きリピーター様限定 of 『オリジナル猫おやつ差し入れ特典付きプラン』のシークレットクーポンをお送りします！
+看板猫「みーちゃん」「ちびちゃん」たちから日頃の感謝を込めて、猫ちゃん大好きリピーター様限定の『オリジナル猫おやつ差し入れ特典付きプラン』のシークレットクーポンをお送りします！
 ご宿泊時にこの画面を見せていただくと、猫ちゃんに直接おやつをあげられる「おやつセット」をプレゼントいたします。また会いにお越しくださいにゃん🐾`,
     report: `【データ統合分析AI・経営改善提言レポート】
 対象施策：猫好きリピート促進対策
@@ -150,182 +160,20 @@ Cool and cozy hot spring for hot summer! Our natural spring "Nuru-yu" (39°C) is
 データ抽出期間：本日（リアルタイム同期）
 1. 施策実施効果（速報値）
 - 集客チャネル露出度：InstagramとGoogleマップ上での「ぬる湯・長湯」紹介の閲覧数が前月比 +38% を記録。特に30代〜50代の「自律神経の乱れ・疲労蓄積」への訴求が効果を発揮。
-- 新規予約件数：夏休みの平日枠に対する公式HP経由の新規WEB予約が本日までに前年同月比 +15% 増加。
+- 新規予約件数：夏休みの平日枠に対する公式HP経由 of 新規WEB予約が本日までに前年同月比 +15% 増加。
 2. 顧客データベース相関分析
-- 「ぬる湯 (onsen)」タグを持つ佐藤様, 鈴木様, 渡辺様の再来店予測確率が向上。
-- LINEクーポン「平日冷酒特典」の配布後、3日以内でのリピート予約問い合わせが数件発生しました。
+- 「ぬる湯 (onsen)」タグを持つ佐藤様、鈴木様、渡辺様の再来店予測確率が向上。
+- LINEクーポン「平日冷酒特典」の配布後、3 day以内でのリピート予約問い合わせが数件発生しました。
 3. 経営戦略・次回への提言
 - 平日の稼働率向上が顕著に表れているため、この期間を対象とした「温泉ソムリエによるぬる湯入浴法ミニガイド」などのコンテンツをHPに追加すると、さらに宿泊満足度が向上します。
 - 夏休みの休前日（土曜・祝前日）は既にほぼ満室のため、マーケティングの広告バナーやSNS発信の対象を「平日限定」にさらに絞り込むことで、広告費用の最適化（CPA削減）が可能です。`
   },
-  vegan: {
-    hp_summary: `<!-- AI Overviews & 中華ヴィーガンブロック -->
-<div class="ryokan-summary-block" style="border: 2px solid #d4af37; background: #faf8f5; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
-  <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #1b3b2b; padding-bottom: 8px;">本格創作中華 ✕ 癒やしのヴィーガン対応（木金日限定）</h2>
-  <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    当館では、<strong>中国人シェフが腕を振るう本格創作中華</strong>をご提供しております。さらに、木曜日・金曜日・日曜日限定で、動物性食材を一切使用しない<strong>「本格中華ヴィーガンコース」</strong>への変更も対応可能です。地元那須の新鮮な高原野菜や大豆ミートを活かし、奥深いコクと旨味を再現。健康志向の方やアレルギー対応、インバウンドのお客様から高い評価をいただいています。また、名物の川魚（イワナ・ヤマメ）はご注文後に炭火で45分かけて焼き上げて提供します。
-  </p>
-</div>`,
-    hp_jsonld: `<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  "name": "塩原温泉 赤沢温泉旅館",
-  "telephone": "0287-46-5700",
-  "address": {
-    "@type": "PostalAddress",
-    "postalCode": "329-2921",
-    "addressRegion": "栃木県",
-    "addressLocality": "那須塩原市",
-    "streetAddress": "塩原1149"
-  },
-  "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "本格創作中華料理", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "ヴィーガン・ベジタリアン対応コース(木金日限定)", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "地元川魚の炭火焼きたて提供", "value": true }
-  ]
-}
-<\/script>`,
-    gbp_post: `【那須の新鮮野菜を味わう本格創作中華 ＆ 木金日限定ヴィーガンコース】
-当館の自慢は、温泉旅館としては珍しい「本格創作中華料理」です🍲
-中国人シェフが那須高原の旬の野菜を使用し、ここでしか味わえない中華を仕上げます。
-また、木・金・日曜日限定でヴィーガン中華コースもご用意可能です。ヘルシーでありながら満足感の高い、エシカルな食事体験をぜひお楽しみください。
-#塩原温泉 #赤沢温泉旅館 #創作中華 #ヴィーガン料理 #那須高原野菜 #健康志向 #温泉旅行`,
-    gbp_img_desc: "色鮮やかな那須高原野菜と大豆ミートの本格ヴィーガンエビチリ風料理の写真",
-    insta_post: `体に優しい「中華ヴィーガンコース」のご案内🥗✨
-木曜日・金曜日・日曜日限定で、動物性食材を一切使わない本格創作中華コースをお選びいただけます。地元那須の豊かな大自然で育った高原野菜を中心に、シェフがこだわり抜いた調味料で仕上げた一品一品は、ヴィーガンのお客様だけでなく「翌朝の体が軽い」と一般のお客様にも大好評です。
-Lukewarm onsen & vegan Chinese course in Nasu-Shiobara. Enjoy ethical and healthy dinner! 🍃🍲
-#赤沢温泉旅館 #塩原温泉 #ヴィーガン中華 #ベジタリアン対応 #那須野菜 #健康ごはん #エシカルライフ #インバウンドグルメ #VeganOnsen #OnsenRyokan #HealthyTravel`,
-    line_post: `【健康志向のリピーター様へ🍲】いつも赤沢温泉旅館をご愛顧いただきありがとうございます。
-今回は、大好評の「本格中華ヴィーガンコース」をお得に楽しめる特別優待クーポンをお届けします！
-木・金・日曜日のご宿泊で本クーポンを適用いただくと、ヴィーガンコースへのアップグレード料金を半額サービスいたします。心も身体も「デトックス＆リセット」する静養のひとときを、ぜひまた当館でお過ごしください。`,
-    report: `【データ統合分析AI・経営改善提言レポート】
-対象施策：創作中華・ヴィーガン対応促進プラン
-データ抽出期間：本日（リアルタイム同期）
-1. 施策実施効果（速報値）
-- 集客チャネル露出度：塩原唯一のヴィーガン対応宿として検索流入が前週比 +42% 増加。特に外国人観光客および健康志向の高い30代女性層のアクセスが集中。
-- 新規予約件数：ヴィーガン・中華料理訴求プランの公式HP経由の新規予約が前月比 +18% 向上。
-2. 顧客データベース相関分析
-- 「ヴィーガン (vegan)」および「ぬる湯 (onsen)」タグを持つリン様、高橋様、ジェームズ様の再来店予測スコアが最大12%向上。
-- アンケート満足度（ポジティブ率）も、料理に対する高評価が寄与し 75% ➔ 86% へと改善しています。
-3. 経営戦略・次回への提言
-- ヴィーガンコースの満足度が高いため、自社製オーガニックハーブティーのお土産特典などをセットにした「プレミアムウェルネスプラン」の創設を推奨します。また、アレルギー対応の基準をHPに明記することでさらなる信頼獲得が期待できます。`
-  },
-  inbound: {
-    hp_summary: `<!-- AI Overviews & インバウンド対応ブロック -->
-<div class="ryokan-summary-block" style="border: 2px solid #d4af37; background: #faf8f5; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
-  <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #1b3b2b; padding-bottom: 8px;">English-speaking Friendly & Traditional Lukewarm Onsen</h2>
-  <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    Welcome to Akasawa Onsen Ryokan, a quiet countryside retreat along the Hoki River. We are pleased to welcome international guests with <strong>English and Chinese support</strong>. Our signature feature is 100% natural <strong>lukewarm hot spring (38-40°C)</strong>, allowing you to relax for a long bath. Please note that we have four friendly resident cats in the lobby, no elevator (stairs only), and the entire property is non-smoking. Vegan dinners are available on Thu, Fri, and Sun upon request.
-  </p>
-</div>`,
-    hp_jsonld: `<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  "name": "塩原温泉 赤沢温泉旅館",
-  "telephone": "0287-46-5700",
-  "address": {
-    "@type": "PostalAddress",
-    "postalCode": "329-2921",
-    "addressRegion": "栃木県",
-    "addressLocality": "那須塩原市",
-    "streetAddress": "塩原1149"
-  },
-  "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "English & Chinese Speaking Staff", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "Lukewarm Hot Spring (38-40°C)", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "4 Resident Cats in Lobby", "value": true }
-  ],
-  "knowsLanguage": ["ja", "en", "zh"]
-}
-<\/script>`,
-    gbp_post: `【Welcome International Guests! Luke-warm Onsen & Cat Healing 🐱♨️】
-Akasawa Onsen Ryokan is a boutique hotel with only 10 rooms along the beautiful river.
-We offer comfortable stay with friendly English and Chinese support. Relax in our natural lukewarm hot spring, meet our mascot cats, and enjoy creative Chinese cuisine.
-#NasuShiobara #OnsenRyokan #MascotCat #LukewarmSpring #JapanTravel #VegetarianFriendly`,
-    gbp_img_desc: "和紙の提灯が優しく照らす和モダンな客室と、窓の外に広がる箒川の美しい渓流の写真",
-    insta_post: `Escape the bustle of the city and heal your mind and body at Akasawa Onsen Ryokan! 🍃✨
-We welcome guests from all over the world with English & Chinese support. Experience our relaxing lukewarm onsen (38-40°C), meet our 4 friendly lobby cats, and enjoy seasonal creative Chinese dinners.
-※We have stairs only (no elevator), and we are completely non-smoking to protect our guests and cats.
-#AkasawaOnsen #NasuShiobara #JapanRyokan #MascotCat #LukewarmOnsen #VeganFriendlyJapan #InboundJapan #TravelJapan #TraditionalJapan #CountrySideRyokan`,
-    line_post: `【外国人観光客・語学関心の高いお客様へ🌐】いつもありがとうございます。
-海外のご家族・ご友人をご紹介いただけるお客様、または英語での接客サポートをご利用されたいお客様へ、特別な『お土産付き紹介クーポン』をプレゼントします！
-ご紹介いただいた外国人のお客様、または本画面をご提示いただいたお客様に、館内用英語アメニティまたは地元の特産品をプレゼントいたします。多国籍な文化が交流する温かい宿として、ぜひまたご利用ください。`,
-    report: `【データ統合分析AI・経営改善提言レポート】
-対象施策：インバウンド多言語化・案内徹底プラン
-データ抽出期間：本日（リアルタイム同期）
-1. 施策実施効果（速報値）
-- 集客チャネル露出度：Booking.comおよびTripadvisorの英語クエリ検索流入数が前月比 +48% と急増。台湾・香港・北米・欧米からの予約問い合わせ率が改善。
-- インバウンド予約件数：多言語FAQおよび注意書き（タトゥー・エレベーターなし）の明記により、成約率が +12% 向上しつつ、直前のキャンセル率が低下。
-2. 顧客データベース相関分析
-- インバウンド顧客であるリン様、ジェームズ様、チャン様の再来店予測およびクチコミ投稿確率が向上。
-- クチコミ評点も、言語サポートの充実とおもてなしの安心感により、Booking.comで 8.8 ➔ 9.2 へと改善。
-3. 経営戦略・次回への提言
-- 欧米およびアジアのウェルネス志向層は「ぬる湯長湯」と「ヴィーガン中華」の組み合わせに強い価値を見出しているため、多言語による温泉効能解説書を客室に配置することを推奨します。`
-  },
-  access: {
-    hp_summary: `<!-- AI Overviews & アクセス・送迎案内ブロック -->
-<div class="ryokan-summary-block" style="border: 2px solid #d4af37; background: #faf8f5; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
-  <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #1b3b2b; padding-bottom: 8px;">アクセスと無料送迎についてのご案内（事前予約制）</h2>
-  <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    当館は那須塩原の静かな山間に位置する一軒宿です。公共交通機関でお越しの際、那須塩原駅発の塩原温泉バスターミナル行きバスは<strong>14時台が最終</strong>となりますのでご注意ください。塩原温泉バスターミナルからは<strong>前日までの事前予約制にて無料送迎</strong>を承っております。ご希望のお客様は前日までに到着予定時刻をお知らせください。※お車の場合は無料駐車場がございます。
-  </p>
-</div>`,
-    hp_jsonld: `<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  "name": "塩原温泉 赤沢温泉旅館",
-  "telephone": "0287-46-5700",
-  "address": {
-    "@type": "PostalAddress",
-    "postalCode": "329-2921",
-    "addressRegion": "栃木県",
-    "addressLocality": "那須塩原市",
-    "streetAddress": "塩原1149"
-  },
-  "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "無料送迎バス(バスターミナルから・要前日予約)", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "無料駐車場完備", "value": true }
-  ]
-}
-<\/script>`,
-    gbp_post: `【公共交通機関でお越しのお客様へ：アクセス・最終バス時刻と無料送迎のご案内】
-新幹線で那須塩原駅へお越しになるお客様へ、大切なお知らせです。
-駅から当館近くのバスターミナルへ向かうバスの最終便は「14時台」と非常に早くなっております。乗り遅れにご注意のうえ、のどかな景色をお楽しみください🚌
-バスターミナルからは無料送迎（前日までの予約制）を行っておりますので、ご希望のお客様はお気軽にお問い合わせください。
-#塩原温泉 #赤沢温泉旅館 #アクセス案内 #無料送迎 #那須塩原駅 #電車旅 #温泉旅行`,
-    gbp_img_desc: "山並みと青空をバックに走る、那須塩原ののどかな路線バスの写真",
-    insta_post: `公共交通機関でのんびりお越しいただくお客様へ 🚌🍁
-那須塩原駅からのバスターミナル行き路線バスは、最終が【14時台】となります。のんびりしたローカルバスの旅を楽しんでいただくためにも、ぜひお早めのご出発をご計画ください。
-塩原温泉バスターミナルに到着されましたら、当館の無料送迎車でお迎えにあがります（前日までの事前予約制）。どうぞ静かな渓流の宿で、ゆったりとした時間をお楽しみください。
-Useful transportation tip: The last bus from Nasu-Shiobara Station leaves at around 2 PM. Shuttle service from the bus terminal is available upon reservation. 🚌✨
-#赤沢温泉旅館 #塩原温泉 #電車旅 #女子一人旅 #アクセスガイド #送迎あり #新幹線の旅 #のんびり旅行 #NasuTravel #OnsenAccess`,
-    line_post: `【ご旅行計画中のリピーター様へアクセス情報🚌】
-お乗り遅れや道迷いのないよう、アクセス情報のまとめをお届けします。那須塩原駅からのバスターミナル行きバスは最終【14時台】です！
-前日までにご連絡いただければ、バスターミナルまで無料でお迎えにあがります。
-本画面をご提示のうえ送迎予約をいただいたリピーター様には、道中や客室で楽しめる「赤沢温泉特製にゃんこクッキー」をプレゼントいたします🐾 またのご来館を心よりお待ちしております。`,
-    report: `【データ統合分析AI・経営改善提言レポート】
-対象施策：アクセス・送迎案内標準化プラン
-データ抽出期間：本日（リアルタイム同期）
-1. 施策実施効果（速報値）
-- 問合せ電話数の削減：3日前リマインドメールによる「最終バス14時台」の告知徹底により、当日の「バスに遅れた」「道に迷った」という問い合わせ電話件数が 64% 減少。
-- 送迎運用の効率化：前日までの送迎台帳登録率が 100% となり、スタッフの送迎オペレーション漏れがゼロとなりました。
-2. 顧客データベース相関分析
-- 送迎およびアクセス確認タグを持つお客様の来館前期待値と安心感が向上。
-- 口コミにおける「アクセスが不便で迷った」等のネガティブ評価が今後発生するリスクが大幅に削減されました。
-3. 経営戦略・次回への提言
-- 公共交通機関利用のお客様はチェックイン時刻が早まる傾向にあるため、ロビーでの「看板猫ふれあいハーブティーサービス」などのウェルカムドリンクの提供オペレーションを同時強化することを推奨します。`
-  },
   fix: {
-    hp_summary: `<!-- 公式サイト情報修正ブロック -->
-<div class="ryokan-summary-block" style="border: 2px solid #52b788; background: #f4faf7; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
-  <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #52b788; padding-bottom: 8px;">【お知らせ】公式サイトの表記修正およびNAP情報の統一完了</h2>
+    hp_summary: `<!-- AI Overviews & 止血要約ブロック -->
+<div class="ryokan-summary-block" style="border: 2px solid #ff4d4f; background: #fff1f0; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
+  <h2 style="color: #cf1322; font-size: 20px; margin-top: 0; border-bottom: 2px solid #cf1322; padding-bottom: 8px;">【緊急告知】他ホテル名掲載に関するお詫びと訂正</h2>
   <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    平素より塩原温泉 赤沢温泉旅館をご愛顧いただき、誠にありがとうございます。
-    この度、公式サイトの「予約4大特典」ページ内に混入しておりました他ホテル名の誤記述（ほてるISAGO神戸）の完全削除を行い、ダミー電話番号（0123-45-6789）についても当館の正式番号である<strong>0287-46-5700</strong>へすべてのページで修正・統一を行いました。
-    お客様に混乱を招きましたことを深くお詫び申し上げますとともに、今後も信頼性の高い情報提供とより良いサービスの提供に努めてまいります。
+    当館公式WEBサイト上において、無関係な他ホテル名（ほてるISAGO神戸）および誤った電話番号が混入していた不具合を修正いたしました。お客様にはご混乱を招きましたことを深くお詫び申し上げます。現在は「塩原温泉 赤沢温泉旅館」として正しい情報（那須塩原市塩原1149、TEL: 0287-46-5700）に修正が完了しております。
   </p>
 </div>`,
     hp_jsonld: `<script type="application/ld+json">
@@ -340,25 +188,24 @@ Useful transportation tip: The last bus from Nasu-Shiobara Station leaves at aro
     "addressRegion": "栃木県",
     "addressLocality": "那須塩原市",
     "streetAddress": "塩原1149"
-  },
-  "url": "https://akasawaonsen.com/"
+  }
 }
 <\/script>`,
-    gbp_post: `【公式サイト情報修正およびお詫びとご案内】
-公式サイト上に一部混入していた誤ったホテル名表記、および一部ページでのダミー電話番号の記載をすべて修正し、当館の正式な連絡先（0287-46-5700）へ統一を完了いたしました。
-お客様にはご心配をおかけいたしました。今後とも変わらぬご愛顧を賜りますようお願い申し上げます。
-#塩原温泉 #赤沢温泉旅館 #お知らせ #公式サイト修正`,
-    gbp_img_desc: "緑豊かな山々と箒川のせせらぎが美しい、赤沢温泉旅館の全景外観写真",
-    insta_post: `【公式サイト誤記修正および表記統一完了のお知らせ】
-平素より格別のご高配を賜り厚く御礼申し上げます。
-公式サイトの一部ページにございました他ホテル名の混入、およびダミー電話番号（0123-45-6789）の残置について、すべて修正を完了いたしました。
-当館の正式電話番号は【0287-46-5700】となります。お電話でのお問い合わせやご予約は、こちらの番号にて承っております。
-We have successfully corrected the incorrect information on our official website. Our correct telephone number is +81-287-46-5700. We apologize for any inconvenience. 🙇‍♂️✨
-#赤沢温泉旅館 #塩原温泉 #公式サイト更新 #お知らせ #お詫びとご案内 #那須塩原 #温泉旅館`,
-    line_post: `【公式サイト表示情報の修正・統一完了のお知らせ】
-いつも赤沢温泉旅館を応援いただき、誠にありがとうございます。
-公式サイト内に一部残存していた誤表記およびダミー電話番号をすべて消去・修正いたしました。
-今後、お客様により正確で信頼できる情報をお届けできるよう、管理体制の強化に努めてまいります。これからも赤沢温泉旅館をよろしくお願いいたします。`,
+    gbp_post: `【公式情報修正とお詫びのお知らせ】
+当館のGoogleビジネスプロフィールおよびWEBサイトにおいて、誤って他府県のホテル名や誤った連絡先が表示されていた問題を修正いたしました。
+当館は栃木県那須塩原市の「塩原温泉 赤沢温泉旅館（0287-46-5700）」であり、他施設とは一切関係ございません。引き続きご愛顧のほどよろしくお願い申し上げます。
+#塩原温泉 #赤沢温泉旅館 #お知らせ`,
+    gbp_img_desc: "正しい看板が掲げられた赤沢温泉旅館の正面玄関の写真",
+    insta_post: `【公式情報の修正と正しい情報のお知らせ】
+いつも赤沢温泉旅館を応援いただきありがとうございます。
+このたび、公式の店舗名記述および連絡先の誤表記を完全に修正いたしました。
+当館は「塩原温泉 赤沢温泉旅館」です。温泉街の箒川沿いに佇む静かな小宿として、皆様のお越しを正しいおもてなしでお待ちしております。🌱
+#塩原温泉 #赤沢温泉旅館 #那須塩原 #お知らせ`,
+    line_post: `【重要・公式情報修正のお知らせ】
+リピーターの皆様、いつも赤沢温泉旅館をご愛顧いただきありがとうございます。
+当館公式WEBサイトでのホテル名の誤表記などの不具合を修正いたしました。
+ご不便をおかけいたしましたお客様には深くお詫び申し上げます。
+正しい情報のもと、今後ともみーちゃんたち看板猫とぬる湯の癒やしをお届けしてまいります。`,
     report: `【データ統合分析AI・経営改善提言レポート】
 対象施策：信頼毀損の緊急止血アクション（NAP統一・他ホテル名削除）
 データ抽出期間：本日（リアルタイム同期）
@@ -370,67 +217,8 @@ We have successfully corrected the incorrect information on our official website
 3. 経営戦略・次回への提言
 - 止血は完了しました。次のフェーズとして、公式HPトップへの「結論ブロック」の追加および「構造化データ（JSON-LD）」の設置を実行し、鮮度ペナルティの完全解除（C ➔ B〜Aランクへの昇格）を目指すことを強く推奨します。`
   }
-};��の触れ合い報告の増加により 75% ➔ 88% へと改善しています。
-3. 経営戦略・次回への提言
-- 猫好き顧客のリピート率は非常に高いため、次回予約時の「お部屋への看板猫派遣サービス（アレルギーがないお客様限定）」などのさらなるプレミアム体験オプションを新設することで、客単価アップが期待できます。
-- 露出増加に伴い、猫アレルギーについての懸念問い合わせも微増しているため、HPのFAQにおける「アレルギー対策と客室隔離の取り組み」の記述をさらに強化することを推奨します。`
-  },
-  summer: {
-    hp_summary: `<!-- AI Overviews & 夏のぬる湯ブロック -->
-<div class="ryokan-summary-block" style="border: 2px solid #d4af37; background: #faf8f5; padding: 20px; border-radius: 12px; font-family: 'Noto Serif JP', serif; color: #333;">
-  <h2 style="color: #1b3b2b; font-size: 20px; margin-top: 0; border-bottom: 2px solid #1b3b2b; padding-bottom: 8px;">夏こそ入りたい、源泉かけ流しの「ぬる湯」</h2>
-  <p style="font-size: 15px; line-height: 1.7; margin-bottom: 15px;">
-    栃木県塩原温泉郷の箒川沿いに位置する当館は、<strong>38〜40℃の自家源泉かけ流し「ぬる湯」</strong>が最大の魅力です。熱い温泉とは異なり、体に負担をかけずに1時間以上じっくり長湯ができ、夏の湯あたりや冷え性防止、自律神経の回復に最適です。川の心地よいせせらぎを聞きながら、心身を解きほぐす極上の長湯をご体験いただけます。
-  </p>
-</div>`,
-    hp_jsonld: `<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  "name": "塩原温泉 赤沢温泉旅館",
-  "telephone": "0287-46-5700",
-  "address": {
-    "@type": "PostalAddress",
-    "postalCode": "329-2921",
-    "addressRegion": "栃木県",
-    "addressLocality": "那須塩原市",
-    "streetAddress": "塩原1149"
-  },
-  "amenityFeature": [
-    { "@type": "LocationFeatureSpecification", "name": "自家源泉100%ぬる湯かけ流し(38-40℃)", "value": true },
-    { "@type": "LocationFeatureSpecification", "name": "全室リバービューの静かな環境", "value": true }
-  ]
-}
-<\/script>`,
-    gbp_post: `【夏の暑さに疲れた心身に。極上の「ぬる湯長湯」のご案内】
-外は暑くても、エアコンや冷たいもので体の中は冷えがちです。当館の温泉は浴槽で「38〜40℃」に調整された自家源泉かけ流しのぬる湯。
-心臓や体に負担をかけずにのんびり湯船に浸かることで、自律神経が整い、夏の睡眠不足や疲労もスッキリ解消します。せせらぎを聞きながらの「長湯体験」、ぜひお試しください。
-#塩原温泉 #赤沢温泉旅館 #ぬる湯 #源泉かけ流し #湯治 #夏の冷え性 #温泉旅行`,
-    gbp_img_desc: "湯気がほんのり漂う、川のせせらぎが目の前に広がる岩露天風呂の写真",
-    insta_post: `夏こそ、じっくり長湯の「ぬる湯」です♨️
-当館の自家源泉は湯船で約39℃。熱すぎないからこそ、1時間でものんびりと温泉に浸かることができます。川風を感じながら、夏の疲れをリセットしに来ませんか？
-Cool and cozy hot spring for hot summer! Our natural spring "Nuru-yu" (39°C) is perfect for long, relaxing baths. Feel the river breeze and unwind. 🍃
-#赤沢温泉旅館 #塩原温泉 #ぬる湯 #長湯 #源泉かけ流し #露天風呂 #夏旅 #自律神経を整える #温泉療法 #NasuShiobara #OnsenHealing`,
-    line_post: `【夏休み平日限定・ぬる湯満喫リピートクーポン】
-赤沢温泉旅館の「ぬる湯」をいつもご愛顧いただきありがとうございます。
-うだるような夏の暑さを乗り切るための「長湯プラン」をご用意しました。
-本クーポンをご利用のうえ、夏休みの平日にご宿泊いただいたリピーター様には、ご夕食時に「地酒の冷酒一合」または「ノンアルコール果汁サイダー」を大人人数分無料サービスいたします！
-心地よい川の風と、猫ちゃんたちがお待ちしております。`,
-    report: `【データ統合分析AI・経営改善提言レポート】
-対象施策：夏のぬる湯長湯アピールプラン
-データ抽出期間：本日（リアルタイム同期）
-1. 施策実施効果（速報値）
-- 集客チャネル露出度：InstagramとGoogleマップ上での「ぬる湯・長湯」紹介の閲覧数が前月比 +38% を記録。特に30代〜50代の「自律神経の乱れ・疲労蓄積」への訴求が効果を発揮。
-- 新規予約件数：夏休みの平日枠に対する公式HP経由の新規WEB予約が本日までに前年同月比 +15% 増加。
-2. 顧客データベース相関分析
-- 「ぬる湯 (onsen)」タグを持つ佐藤様、鈴木様、渡辺様の再来店予測確率が向上。
-- LINEクーポン「平日冷酒特典」の配布後、3日以内でのリピート予約問い合わせが数件発生しました。
-3. 経営戦略・次回への提言
-- 平日の稼働率向上が顕著に表れているため、この期間を対象とした「温泉ソムリエによるぬる湯入浴法ミニガイド」などのコンテンツをHPに追加すると、さらに宿泊満足度が向上します。
-- 夏休みの休前日（土曜・祝前日）は既にほぼ満室のため、マーケティングの広告バナーやSNS発信の対象を「平日限定」にさらに絞り込むことで、広告費用の最適化（CPA削減）が可能です。`
-  }
 };
-// ナレッジベースの読み込み
+
 async function loadKnowledgeBase() {
   try {
     const mvvRes = await fetch("data/mvv.txt");

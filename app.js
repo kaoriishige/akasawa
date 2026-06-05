@@ -17,6 +17,41 @@ let voiceRecognition = null;
 let currentDiagnosisScore = 52;
 let isEmergencyFixed = false;
 
+// モバイル向け音声ロック解除関数
+let isMobileAudioUnlocked = false;
+function unlockMobileAudio() {
+  if (isMobileAudioUnlocked) return;
+  
+  // 1. AudioContext のロック解除
+  try {
+    if (!currentAudioCtx) {
+      currentAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (currentAudioCtx && currentAudioCtx.state === "suspended") {
+      currentAudioCtx.resume().then(() => {
+        console.log("Mobile AudioContext resumed successfully.");
+      });
+    }
+  } catch (e) {
+    console.warn("Failed to unlock Mobile AudioContext:", e);
+  }
+  
+  // 2. Web Speech API (speechSynthesis) のロック解除
+  try {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance("");
+      u.volume = 0.0;
+      window.speechSynthesis.speak(u);
+      console.log("Mobile Web Speech API unlocked.");
+    }
+  } catch (e) {
+    console.warn("Failed to unlock Web Speech:", e);
+  }
+  
+  isMobileAudioUnlocked = true;
+}
+
+
 // ==================== VOICEVOX 音声合成 ====================
 let voiceEnabled = false;
 let selectedVoiceSpeaker = 5; // デフォルト: 東北ずん子
@@ -573,9 +608,13 @@ function initEventHandlers() {
   const sendChatBtn = document.getElementById("send-chat-btn");
   const chatInput = document.getElementById("coo-chat-input");
   if (sendChatBtn && chatInput) {
-    sendChatBtn.addEventListener("click", () => handleCooChatSend());
+    sendChatBtn.addEventListener("click", () => {
+      unlockMobileAudio();
+      handleCooChatSend();
+    });
     chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
+        unlockMobileAudio();
         handleCooChatSend();
       }
     });
@@ -605,6 +644,7 @@ function initEventHandlers() {
       };
 
       voiceBtn.addEventListener("click", () => {
+        unlockMobileAudio();
         if (voiceBtn.classList.contains("recording")) {
           voiceRecognition.stop();
         } else {
@@ -1409,6 +1449,18 @@ async function speakText(text) {
   // 再生中の音声を停止
   stopVoice();
 
+  // スマホ対応：非同期処理 (fetch) の前に、ユーザー操作の同期コンテキストで AudioContext を有効化しておく
+  try {
+    if (!currentAudioCtx) {
+      currentAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (currentAudioCtx && currentAudioCtx.state === 'suspended') {
+      currentAudioCtx.resume();
+    }
+  } catch (e) {
+    console.warn("Failed to activate AudioContext in speakText:", e);
+  }
+
   // テキストを整形（HTMLタグや装飾記号を除去、300文字に制限）
   let cleanText = text
     .replace(/<br\s*\/?>/gi, '。')
@@ -1797,6 +1849,7 @@ function initVoiceChatMode() {
 
   if (modeBtn) {
     modeBtn.addEventListener('click', () => {
+      unlockMobileAudio();
       if (isVoiceChatActive) {
         stopVoiceChatMode();
       } else {
